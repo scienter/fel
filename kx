@@ -1,0 +1,701 @@
+EzSolve.c:   double totalCnt,coef,sumSin[D->zmode],sumCos[D->zmode],cosTh[D->zmode],sinTh[D->zmode]; 
+EzSolve.c:   zmode=D->zmode;
+EzSolve.c:   sliceN=D->sliceN;
+EzSolve.c:   nSpecies=D->nSpecies;
+EzSolve.c:   coef=-1.0*eCharge*velocityC*velocityC*mu0/D->ks/D->area;
+EzSolve.c:       p=D->particle[i].head[s]->pt;
+EzSolve.c:       D->EzR[0][l][i]=coef/(l+1.0)*sumSin[l]/totalCnt;
+EzSolve.c:       D->EzI[0][l][i]=coef/(l+1.0)*sumCos[l]/totalCnt;
+boundary.c:   double complex *tmpM,data,sum,alpha[D->harmony],beta[D->harmony];
+boundary.c:   dZ=D->lambda0*D->numSlice;
+boundary.c:   minZ=D->minZ;
+boundary.c:   sliceN=D->sliceN;
+boundary.c:   D->minmax=(int *)malloc((nTasks+1)*sizeof(int ));
+boundary.c:   D->minmax[0]=0;
+boundary.c:   D->minmax[nTasks]=sliceN;
+boundary.c:     LL=D->loadList;
+boundary.c:            D->minmax[rank]=i;
+boundary.c:   MPI_Bcast(D->minmax,nTasks+1,MPI_INT,0,MPI_COMM_WORLD);
+boundary.c:   D->minI=D->minmax[myrank];
+boundary.c:   D->maxI=D->minmax[myrank+1];
+boundary.c:   D->subSliceN=D->maxI-D->minI;
+boundary.c:   printf("myrank=%d,minI=%d,maxI=%d,subSliceN=%d\n",myrank,D->minI,D->maxI,D->subSliceN);
+boundary.c:   D->U=complexMemory3Asign(D->harmony,D->subSliceN+2,D->nx,D->ny);
+boundary.c:   D->Ez=complexMemory3Asign(D->zmode,D->subSliceN+2,D->nx,D->ny);
+boundary.c:   D->Sc=complexMemory3Asign(D->harmony,D->subSliceN+2,D->nx,D->ny);
+boundary.c:   D->totalEnergy=(double *)malloc(D->maxStep*sizeof(double ));
+boundary.c:   for(i=0; i<D->maxStep; i++) D->totalEnergy[i]=0.0;
+boundary.c:   LL=D->loadList;
+boundary.c:   D->particle=(Particle *)malloc((D->subSliceN+2)*sizeof(Particle ));
+boundary.c:   for(i=0; i<D->subSliceN+2; i++) {
+boundary.c:     D->particle[i].head = (ptclHead **)malloc(sizeof(ptclHead *));
+boundary.c:     for(s=0; s<D->nSpecies; s++) {
+boundary.c:       D->particle[i].head[s] = (ptclHead *)malloc(sizeof(ptclHead ));
+boundary.c:       D->particle[i].head[s]->pt=NULL;
+boundary.c:   D->prevBx=0.0;
+boundary.c:   D->prevBy=0.0;
+boundary.c:   D->twsBX = (double *)malloc((D->maxStep+1)*sizeof(double ));
+boundary.c:   D->twsGX = (double *)malloc((D->maxStep+1)*sizeof(double ));
+boundary.c:   D->twsAX = (double *)malloc((D->maxStep+1)*sizeof(double ));
+boundary.c:   D->twsEmitX = (double *)malloc((D->maxStep+1)*sizeof(double ));
+boundary.c:   D->twsBY = (double *)malloc((D->maxStep+1)*sizeof(double ));
+boundary.c:   D->twsGY = (double *)malloc((D->maxStep+1)*sizeof(double ));
+boundary.c:   D->twsAY = (double *)malloc((D->maxStep+1)*sizeof(double ));
+boundary.c:   D->twsEmitY = (double *)malloc((D->maxStep+1)*sizeof(double ));
+boundary.c:   D->twsG = (double *)malloc((D->maxStep+1)*sizeof(double ));
+boundary.c:   nx=D->nx;   ny=D->ny;
+boundary.c:   D->Ma=complexMemoryAsign(D->harmony,D->nx,D->nx);
+boundary.c:   D->Mb=complexMemoryAsign(D->harmony,D->ny,D->ny);
+boundary.c:   D->invMa=complexMemoryAsign(D->harmony,D->nx,D->nx);
+boundary.c:   D->invMb=complexMemoryAsign(D->harmony,D->ny,D->ny);
+boundary.c:   D->tmpU=(double complex *)malloc(D->nx*D->ny*sizeof(double complex ));
+boundary.c:   if(D->dimension==3)  {
+boundary.c:     for(h=0; h<D->harmony; h++) {
+boundary.c:       alpha[h]=-I*D->dz*0.25/(D->ks*(h+1))/D->dx/D->dx;
+boundary.c:       for(i=0; i<N; i++) D->Ma[h][i]=0.0+I*0.0;
+boundary.c:         D->Ma[h][i*(nx+1)+0]=1.0-2*alpha[h];
+boundary.c:         D->Ma[h][i*(nx+1)+1]=alpha[h];
+boundary.c:         D->Ma[h][i*(nx+1)-1]=alpha[h];
+boundary.c:         D->Ma[h][i*(nx+1)+0]=1.0-2*alpha[h];
+boundary.c:         D->Ma[h][i*(nx+1)+1]=alpha[h];
+boundary.c:         D->Ma[h][i*(nx+1)+0]=1.0-2*alpha[h];
+boundary.c:         D->Ma[h][i*(nx+1)-1]=alpha[h];
+boundary.c:           data=D->Ma[h][i*nx+j];
+boundary.c:           D->invMa[h][i*nx+j]=g.dat[0]+I*g.dat[1];
+boundary.c:       beta[h]=-I*D->dz*0.25/(D->ks*(h+1))/D->dy/D->dy;
+boundary.c:         D->Mb[h][i*(ny+1)+0]=1.0-2*beta[h];
+boundary.c:         D->Mb[h][i*(ny+1)+1]=beta[h];
+boundary.c:         D->Mb[h][i*(ny+1)-1]=beta[h];
+boundary.c:         D->Mb[h][i*(ny+1)+0]=1.0-2*beta[h];
+boundary.c:         D->Mb[h][i*(ny+1)+1]=beta[h];
+boundary.c:         D->Mb[h][i*(ny+1)+0]=1.0-2*beta[h];
+boundary.c:         D->Mb[h][i*(ny+1)-1]=beta[h];
+boundary.c:           data=D->Mb[h][i*ny+j];
+boundary.c:           D->invMb[h][i*ny+j]=g.dat[0]+I*g.dat[1];
+boundary.c://           sum+=D->Ma[h][i*nx+nn]*D->invMa[h][nn*nx+j];
+boundary.c:   } else ; 	//End of if(D->dimension==3)
+calBunchingFactor.c:  switch(D->dimension) {
+calBunchingFactor.c:   LL=D->loadList;
+calBunchingFactor.c:       theta=D->particle[s][n].theta;
+calBunchingFactor.c:       weight=D->particle[s][n].weight;
+calBunchingFactor.c:     D->bFact[iteration][sliceI][0]=0.0;
+calBunchingFactor.c:     D->bFact[iteration][sliceI][0]=sqrt(sum[0]*sum[0]+sum[1]*sum[1])/sum[2];
+clean.c:    LL=D->loadList;
+clean.c:      D->loadList=tmpLL; 
+clean.c:      LL=D->loadList;
+clean.c:    free(D->loadList);
+clean.c:    for(i=0; i<D->subSliceN+2; i++) {
+clean.c:      for(s=0; s<D->nSpecies; s++) {
+clean.c:        p=D->particle[i].head[s]->pt;
+clean.c:          D->particle[i].head[s]->pt=tmp;
+clean.c:	  p=D->particle[i].head[s]->pt;
+clean.c:        free(D->particle[i].head[s]);
+clean.c:      free(D->particle[i].head);
+clean.c:    free(D->particle);
+clean.c:    UL=D->undList;
+clean.c:    QD=D->qdList;
+clean.c:    while(QD->next) {
+clean.c:      if(QD->numbers>0) {
+clean.c:        free(QD->unitStart);
+clean.c:        free(QD->unitEnd);
+clean.c:        free(QD->qdStart);
+clean.c:        free(QD->qdEnd);
+clean.c:        free(QD->g);
+clean.c:      QD=QD->next;
+clean.c:    complexDeleteField3(D->U,D->harmony,D->subSliceN+2);
+clean.c:    complexDeleteField3(D->Ez,D->harmony,D->subSliceN+2);
+clean.c:    complexDeleteField3(D->Sc,D->harmony,D->subSliceN+2);
+clean.c:    free(D->totalEnergy);
+clean.c:    deleteField(D->Ma,D->harmony);
+clean.c:    deleteField(D->Mb,D->harmony);
+clean.c:    deleteField(D->invMa,D->harmony);
+clean.c:    deleteField(D->invMb,D->harmony);
+clean.c:    free(D->tmpU);
+clean.c:    free(D->twsBX);
+clean.c:    free(D->twsGX);
+clean.c:    free(D->twsAX);
+clean.c:    free(D->twsEmitX);
+clean.c:    free(D->twsBY);
+clean.c:    free(D->twsGY);
+clean.c:    free(D->twsAY);
+clean.c:    free(D->twsEmitY);
+clean.c:    free(D->minmax);
+clean.c:    L=D->laserList;
+clean.c:      D->laserList=tmpL; 
+clean.c:      L=D->laserList;
+clean.c:    free(D->laserList);
+loadBeam.c:   minI=D->minI;   maxI=D->maxI;
+loadBeam.c:   startI=1;       endI=1+D->subSliceN;
+loadBeam.c:   bucketZ=D->lambda0*D->numSlice;	// size of a big slice
+loadBeam.c:   dPhi=2.0*M_PI*D->numSlice;
+loadBeam.c:     posZ=(i-startI)*bucketZ+D->minZ;
+loadBeam.c://           numbers=0.5/M_PI*exp(-0.5*y1*y1-0.5*y2*y2)*D->dx/sigX*D->dy/sigY*macro*ptclCnt;
+loadBeam.c://           numbers=0.5/M_PI*exp(-0.5*y1*y1-0.5*y2*y2)*D->dx/sigX*D->dy/sigY*macro*ptclCnt;
+loadBeam.c:             New->next = D->particle[i].head[s]->pt;
+loadBeam.c:             D->particle[i].head[s]->pt = New;
+loadBeam.c:   minI=D->minI;   maxI=D->maxI;
+loadBeam.c:   startI=1;	   endI=1+D->subSliceN;
+loadBeam.c:   bucketZ=D->lambda0*D->numSlice;		     	// size of a big slice
+loadBeam.c:   dPhi=2.0*M_PI*D->numSlice;
+loadBeam.c:     posZ=(i-startI+minI)*bucketZ+D->minZ;
+loadBeam.c:             New->next = D->particle[i].head[s]->pt;
+loadBeam.c:             D->particle[i].head[s]->pt = New;
+loadBeam.c:   D->ptclCnt=cnt;
+loadBeam.c:   printf("myrank=%d, ptclCnt=%d\n",myrank,D->ptclCnt);
+loadSeed.c:  switch(D->dimension)  {
+loadSeed.c:   a0=D->a0;
+loadSeed.c:   bucketZ=D->lambda0*D->numSlice;
+loadSeed.c://   sigmaZ=D->duration*velocityC*sqrt(2.0/log(2.0));
+loadSeed.c:   sigmaZ=D->duration*velocityC*2*sqrt(log(2.0));
+loadSeed.c:   minZ=D->minZ+D->lambda0*0.5;
+loadSeed.c:   startI=1; endI=D->subSliceN+1;
+loadSeed.c:   minI=D->minI;
+loadSeed.c:   if(D->mode==Static) {
+loadSeed.c:       D->U[h][i][0]=1.0*a0; 
+loadSeed.c:       D->U[h][i][0]=1.0*amp; 
+parameterSetting.c:   if(FindParameters("Domain",1,"dimension",input,str)) D->dimension=atoi(str);
+parameterSetting.c:   if(FindParameters("Domain",1,"mode",input,str)) D->mode=whatFunctionMode(str);
+parameterSetting.c:   if(D->mode==Static && nTasks>1) {
+parameterSetting.c:   if(FindParameters("Domain",1,"harmony",input,str)) D->harmony=atoi(str);
+parameterSetting.c:   if(FindParameters("Domain",1,"zmode",input,str)) D->zmode=atoi(str);
+parameterSetting.c:   if(FindParameters("Domain",1,"number_lambda_s",input,str)) D->nLambdas=atoi(str);
+parameterSetting.c:   if(FindParameters("Save",1,"save_step",input,str))  D->saveStep=atoi(str);
+parameterSetting.c:   if(FindParameters("Save",1,"save_start",input,str)) D->saveStart=atoi(str);
+parameterSetting.c:   if(FindParameters("Save",1,"dump_save",input,str))  D->dumpSave=whatONOFF(str);
+parameterSetting.c:   else  D->dumpSave=OFF;
+parameterSetting.c:   if(FindParameters("Save",1,"dump_start",input,str)) D->dumpStart=atoi(str);
+parameterSetting.c:   else  D->dumpStart=D->saveStart;
+parameterSetting.c:   if(FindParameters("Save",1,"dump_step",input,str))  D->dumpStep=atoi(str);
+parameterSetting.c:   else  D->dumpStep=D->saveStep;
+parameterSetting.c:   if(FindParameters("Save",1,"field_save",input,str)) D->fieldSave=whatONOFF(str);
+parameterSetting.c:   else  D->fieldSave=ON;
+parameterSetting.c:   if(FindParameters("Save",1,"particle_save",input,str)) D->particleSave=whatONOFF(str);
+parameterSetting.c:   else  D->particleSave=ON;
+parameterSetting.c:   if(FindParameters("Save",1,"density_save",input,str))  D->rhoSave=whatONOFF(str);
+parameterSetting.c:   else  D->rhoSave=ON;
+parameterSetting.c:   if(FindParameters("Save",1,"max_time",input,str)) D->maxTime=atoi(str);
+parameterSetting.c:   else  D->maxTime=525600;
+parameterSetting.c:   if(FindParameters("Save",1,"total_length",input,str)) D->Lz=atof(str);
+parameterSetting.c:   if(FindParameters("Domain",1,"lambdaUs_in_iteration",input,str)) D->numLambdaU=atoi(str);
+parameterSetting.c:   else  D->numLambdaU=1;
+parameterSetting.c:   if(FindParameters("Domain",1,"rangeZ",input,str)) D->rangeZ=atof(str)*1e-6;
+parameterSetting.c:   if(FindParameters("Domain",1,"minX",input,str)) D->minX=atof(str)*1e-6;
+parameterSetting.c:   if(FindParameters("Domain",1,"maxX",input,str)) D->maxX=atof(str)*1e-6;
+parameterSetting.c:   if(FindParameters("Domain",1,"minY",input,str)) D->minY=atof(str)*1e-6;
+parameterSetting.c:   if(FindParameters("Domain",1,"maxY",input,str)) D->maxY=atof(str)*1e-6;
+parameterSetting.c:   if(FindParameters("Domain",1,"nx",input,str)) D->nx=atoi(str);
+parameterSetting.c:   if(FindParameters("Domain",1,"ny",input,str)) D->ny=atoi(str);
+parameterSetting.c:   D->minZ=-0.5*D->rangeZ;
+parameterSetting.c:   D->maxZ=0.5*D->rangeZ;
+parameterSetting.c:   D->dx=(D->maxX-D->minX)/(D->nx*1.0);
+parameterSetting.c:   D->dy=(D->maxY-D->minY)/(D->ny*1.0);
+parameterSetting.c:   D->nx+=1;
+parameterSetting.c:   D->ny+=1;
+parameterSetting.c:   if(D->dimension==1) { D->nx=1; D->ny=1; D->dx=0.0; D->dy=0.0; } else ;
+parameterSetting.c:   if(FindParameters("Domain",1,"ref_energy",input,str)) D->refEnergy=atof(str);
+parameterSetting.c:   if(FindParameters("Domain",1,"slices_in_bucket",input,str)) D->numSlice=atoi(str);
+parameterSetting.c:   if(D->numSlice<D->numLambdaU) {   
+parameterSetting.c:      printf("In [Domain], check the condition 'slices_in_bucket(=%d) >= lambdaUs_in_itertation(=%d).\n",D->numSlice,D->numLambdaU);
+parameterSetting.c:   D->undList = (UndulatorList *)malloc(sizeof(UndulatorList));
+parameterSetting.c:   D->undList->next = NULL;
+parameterSetting.c:   UL = D->undList;
+parameterSetting.c:   D->nUnd = rank-1;
+parameterSetting.c:   UL = D->undList;
+parameterSetting.c:   D->B0x=UL->Bx[0];
+parameterSetting.c:   D->B0y=UL->By[0];
+parameterSetting.c:   D->lambdaU=UL->lambdaU;
+parameterSetting.c:   D->qdList = (QuadList *)malloc(sizeof(QuadList));
+parameterSetting.c:   D->qdList->next = NULL;
+parameterSetting.c:   QD = D->qdList;
+parameterSetting.c:      QD->next=QNew;
+parameterSetting.c:      QD=QD->next;
+parameterSetting.c:   D->nQD = rank-1;
+parameterSetting.c:   if(FindParameters("Seed",1,"power",input,str)) D->P0=atof(str);
+parameterSetting.c:   if(FindParameters("Seed",1,"spot_sigma_R",input,str)) D->spotSigR=atof(str)*1e-6;
+parameterSetting.c:   area=2*M_PI*D->spotSigR*D->spotSigR;
+parameterSetting.c:   if(FindParameters("Seed",1,"duration",input,str)) D->duration=atof(str);
+parameterSetting.c:   if(FindParameters("Phase_shifter",1,"position",input,str)) D->phaseZ=atof(str);
+parameterSetting.c:   else  D->phaseZ=0.0;
+parameterSetting.c:   if(FindParameters("Phase_shifter",1,"value",input,str)) D->phaseValue=atof(str);
+parameterSetting.c:   else  D->phaseValue=0.0;
+parameterSetting.c:   D->phaseValue*=M_PI;
+parameterSetting.c:   D->ku=2.0*M_PI/D->lambdaU;
+parameterSetting.c:   B0=sqrt(D->B0x*D->B0x+D->B0y*D->B0y);
+parameterSetting.c:   D->K0=1.0/sqrt(2.0)*eCharge*B0/eMass/velocityC/D->ku;
+parameterSetting.c:   D->KRef=D->K0;
+parameterSetting.c:   D->gamma0=D->refEnergy/mc2;
+parameterSetting.c:   D->lambda0=D->lambdaU*0.5/D->gamma0/D->gamma0*(1.0+D->K0*D->K0);
+parameterSetting.c:   D->ks=2.0*M_PI/D->lambda0;
+parameterSetting.c:   D->a0=sqrt(D->P0/eps0/velocityC/area)*eCharge/eMass/velocityC/velocityC/D->ks;
+parameterSetting.c:   tmp=D->K0*D->K0*0.5/(1.0+D->K0*D->K0);
+parameterSetting.c:   D->beta0=1.0-0.5*(1.0+D->K0*D->K0)/D->gamma0/D->gamma0;
+parameterSetting.c:   D->dz=D->lambdaU*D->numLambdaU;   
+parameterSetting.c:   if(D->mode==Static || D->mode==Twiss) {
+parameterSetting.c:     D->numSlice=1;
+parameterSetting.c:     D->numLambdaU=1;
+parameterSetting.c:     D->rangeZ=D->lambda0*D->nLambdas;
+parameterSetting.c:     D->minZ=-0.5*D->rangeZ;
+parameterSetting.c:     D->maxZ=0.5*D->rangeZ;
+parameterSetting.c:   D->minPhi=D->minZ*D->ks;
+parameterSetting.c:   D->sliceN=D->rangeZ/(D->lambda0*D->numSlice);
+parameterSetting.c:   if(D->sliceN>50000 || D->sliceN<-50000) {
+parameterSetting.c:      printf("Too much slices. sliceN=%d.\n",D->sliceN);
+parameterSetting.c:   D->maxStep=(int)(D->Lz/D->dz+1);
+parameterSetting.c:   if(D->mode==Time_Dependent) {
+parameterSetting.c:     if(D->maxStep>D->sliceN) D->maxStep=D->sliceN; else ;
+parameterSetting.c:   D->subSliceN=D->sliceN/nTasks;
+parameterSetting.c:   D->phaseShiftStep=(int)(D->phaseZ/D->dz);
+parameterSetting.c:   D->kx=0;
+parameterSetting.c:   D->ky=0;
+parameterSetting.c:     printf("dx=%g, minX=%g, maxX=%g, nx=%d\n",D->dx,D->minX,D->maxX,D->nx);
+parameterSetting.c:     printf("dy=%g, minY=%g, maxY=%g, ny=%d\n",D->dy,D->minY,D->maxY,D->ny);
+parameterSetting.c:     printf("max_step=%d, total_length=%g[m]\n",D->maxStep,D->Lz);
+parameterSetting.c:     printf("numSlice=%d, sliceN=%d, rangeZ=%g\n",D->numSlice,D->sliceN,D->rangeZ);
+parameterSetting.c:     printf("lambda0=%g[nm], lambdaU=%g[cm], dz=%g[cm]\n",D->lambda0*1e9,D->lambdaU*100,D->dz*100);
+parameterSetting.c:     printf("B0=%g[T], K0=%g, JJ0=%g\n",B0,D->K0*sqrt(2.0),JJ0);
+parameterSetting.c:   D->loadList = (LoadList *)malloc(sizeof(LoadList));
+parameterSetting.c:   D->loadList->next = NULL;
+parameterSetting.c:   LL = D->loadList;
+parameterSetting.c:   D->nSpecies = rank-1;
+parameterSetting.c:   if(FindParameters("Quad",rank,"numbers",input,str)) QD->numbers=atoi(str);
+parameterSetting.c:   else  QD->numbers=0;
+parameterSetting.c:   if(QD->numbers>0) {
+parameterSetting.c:     QD->unitStart = (double *)malloc(QD->numbers*sizeof(double));
+parameterSetting.c:     QD->unitEnd = (double *)malloc(QD->numbers*sizeof(double));
+parameterSetting.c:     QD->qdStart = (double *)malloc(QD->numbers*sizeof(double));
+parameterSetting.c:     QD->qdEnd = (double *)malloc(QD->numbers*sizeof(double));
+parameterSetting.c:     QD->g = (double *)malloc(QD->numbers*sizeof(double));
+parameterSetting.c:     if(FindParameters("Quad",rank,"unit_start",input,str)) QD->unitStart[0]=atof(str);
+parameterSetting.c:     if(FindParameters("Quad",rank,"unit_end",input,str)) QD->unitEnd[0]=atof(str);
+parameterSetting.c:     if(FindParameters("Quad",rank,"quad_start",input,str)) QD->qdStart[0]=atof(str);
+parameterSetting.c:     if(FindParameters("Quad",rank,"quad_end",input,str)) QD->qdEnd[0]=atof(str);
+parameterSetting.c:     if(FindParameters("Quad",rank,"g",input,str)) QD->g[0]=atof(str);
+parameterSetting.c:     unitLength=QD->unitEnd[0]-QD->unitStart[0];
+parameterSetting.c:     qdStart=QD->qdStart[0]-QD->unitStart[0];
+parameterSetting.c:     qdLength=QD->qdEnd[0]-QD->qdStart[0];
+parameterSetting.c:     g=QD->g[0];
+parameterSetting.c:     for(i=1; i<QD->numbers; i++)  {
+parameterSetting.c:       QD->unitStart[i]=QD->unitEnd[i-1];
+parameterSetting.c:       QD->unitEnd[i]=QD->unitStart[i]+unitLength;
+parameterSetting.c:       QD->qdStart[i]=QD->unitStart[i]+qdStart;
+parameterSetting.c:       QD->qdEnd[i]=QD->qdStart[i]+qdLength;
+parameterSetting.c:       QD->g[i]=g;
+parameterSetting.c:   return QD->numbers;
+parameterSetting.c:     else  LL->energy=D->refEnergy;
+parameterSetting.c:	    if(D->mode==Static || D->mode==Twiss) { LL->zn[i]=1.0; LL->zenergy[i]=1.0; } else ;
+parameterSetting.c:        L->lambda*=D->gamma*(1.0+D->beta);
+parameterSetting.c:     else  L->lambda=D->lambda;
+parameterSetting.c:     L->loadPointX=((int)(positionX/D->lambda/D->dx));   
+parameterSetting.c:     L->loadPointY=((int)(positionY/D->lambda/D->dy));   
+parameterSetting.c:     L->loadPointZ=((int)(positionZ/D->lambda/D->dz));   
+parameterSetting.c:     L->rayleighLength=pi/(L->lambda/D->gamma/(1.0+D->beta))*L->beamWaist*L->beamWaist/D->lambda;
+parameterSetting.c:     L->beamWaist=L->beamWaist/D->lambda;
+parameterSetting.c:     L->focus=L->focus/D->lambda;
+particlePush.c:  switch(D->dimension)  {
+particlePush.c:    printf("In particlePush, what dimension(%d)?\n",D->dimension);
+particlePush.c:  switch(D->dimension)  {
+particlePush.c:    printf("In particlePush, what dimension(%d)?\n",D->dimension);
+particlePush.c:    dz=D->dz;
+particlePush.c:    ku=D->ku;
+particlePush.c:    ks=D->ks;
+particlePush.c:    kx=D->kx;    ky=D->ky;
+particlePush.c:    K0=D->K0;
+particlePush.c:    g=D->g;
+particlePush.c:    startI=1;  endI=D->subSliceN+1;
+particlePush.c:      for(s=0; s<D->nSpecies; s++)  {
+particlePush.c:        p=D->particle[sliceI].head[s]->pt;
+particlePush.c:    double complex U[D->harmony],compVal,expITh;
+particlePush.c:    double coef,JJ[D->harmony],J1,J2,wx[2],wy[2],sumTh,sumGam;
+particlePush.c:    dz=D->dz;
+particlePush.c:    ku=D->ku;
+particlePush.c:    ks=D->ks;
+particlePush.c:    K0=D->K0;
+particlePush.c:    harmony=D->harmony;
+particlePush.c:    kx=D->kx; ky=D->ky;
+particlePush.c:    dx=D->dx; dy=D->dy;
+particlePush.c:    nx=D->nx; ny=D->ny;
+particlePush.c:    minX=D->minX;  minY=D->minY;
+particlePush.c:    dPhi=2*M_PI*D->numSlice;
+particlePush.c:    startI=1;       endI=D->subSliceN+1;
+particlePush.c:    minI=D->minI;   maxI=D->maxI;
+particlePush.c:    N=D->nx*D->ny;
+particlePush.c:      for(s=0; s<D->nSpecies; s++)  {
+particlePush.c:        p=D->particle[sliceI].head[s]->pt;
+particlePush.c:   	          U[h]+=D->U[h][sliceI][(j+jj)*nx+(i+ii)]*wx[ii]*wy[jj];
+particlePush.c:    double complex U[D->harmony],compVal,expITh;
+particlePush.c:    double coef,JJ[D->harmony],J1,J2,sumTh,sumGam;
+particlePush.c:    startI=1;       endI=D->subSliceN+1;
+particlePush.c:    minI=D->minI;   maxI=D->maxI;
+particlePush.c:    dz=D->dz;
+particlePush.c:    ku=D->ku;
+particlePush.c:    ks=D->ks;
+particlePush.c:    K0=D->K0;
+particlePush.c:    harmony=D->harmony;
+particlePush.c:    dPhi=2*M_PI*D->numSlice;
+particlePush.c:        U[h]=D->U[h][i][0];
+particlePush.c:      for(s=0; s<D->nSpecies; s++)  {
+particlePush.c:        p=D->particle[i].head[s]->pt;
+particleShareZ.c:   particle=D->particle;     
+particleShareZ.c:   nxSub=D->nxSub;
+particleShareZ.c:   nySub=D->nySub;
+particleShareZ.c:   nzSub=D->nzSub;
+particleShareZ.c:   rank=myrank/(D->M*D->N);
+particleShareZ.c:    if(rank%2==0 && rank!=D->L-1)
+particleShareZ.c:          for(s=0; s<D->nSpecies; s++)
+particleShareZ.c:      MPI_Send(&numP,1, MPI_INT,D->nextXrank, myrank, MPI_COMM_WORLD);    
+particleShareZ.c:      MPI_Recv(&numP,1,MPI_INT,D->prevXrank,D->prevXrank,MPI_COMM_WORLD,&status);      
+particleShareZ.c:    if(rank%2==0 && rank!=D->L-1)
+particleShareZ.c:          for(s=0; s<D->nSpecies; s++)
+particleShareZ.c:      MPI_Send(upP,totalData, MPI_DOUBLE,D->nextXrank, myrank, MPI_COMM_WORLD); 
+particleShareZ.c:      MPI_Recv(upP,totalData, MPI_DOUBLE,D->prevXrank,D->prevXrank, MPI_COMM_WORLD,&status);      
+particleShareZ.c:    if(rank%2==1 && rank!=D->L-1)
+particleShareZ.c:          for(s=0; s<D->nSpecies; s++)
+particleShareZ.c:      MPI_Send(&numP,1, MPI_INT,D->nextXrank, myrank, MPI_COMM_WORLD);    
+particleShareZ.c:      MPI_Recv(&numP,1, MPI_INT,D->prevXrank,D->prevXrank, MPI_COMM_WORLD,&status);      
+particleShareZ.c:    if(rank%2==1 && rank!=D->L-1)
+particleShareZ.c:          for(s=0; s<D->nSpecies; s++)
+particleShareZ.c:      MPI_Send(upP,totalData, MPI_DOUBLE,D->nextXrank, myrank, MPI_COMM_WORLD); 
+particleShareZ.c:      MPI_Recv(upP,totalData, MPI_DOUBLE,D->prevXrank,D->prevXrank, MPI_COMM_WORLD,&status);      
+particleShareZ.c:   particle=D->particle;     
+particleShareZ.c:   nxSub=D->nxSub;
+particleShareZ.c:   nySub=D->nySub;
+particleShareZ.c:   nzSub=D->nzSub;
+particleShareZ.c:   rank=myrank/(D->M*D->N);
+particleShareZ.c:          for(s=0; s<D->nSpecies; s++)
+particleShareZ.c:      MPI_Send(&numP,1, MPI_INT,D->prevXrank, myrank, MPI_COMM_WORLD);    
+particleShareZ.c:    else if(rank%2==1 && rank!=D->L-1) 
+particleShareZ.c:      MPI_Recv(&numP,1, MPI_INT,D->nextXrank,D->nextXrank,MPI_COMM_WORLD,&status);        
+particleShareZ.c:          for(s=0; s<D->nSpecies; s++)
+particleShareZ.c:      MPI_Send(btP,totalData, MPI_DOUBLE,D->prevXrank, myrank, MPI_COMM_WORLD); 
+particleShareZ.c:    else if(rank%2==1 && rank!=D->L-1) 
+particleShareZ.c:      MPI_Recv(btP,totalData, MPI_DOUBLE,D->nextXrank,D->nextXrank,MPI_COMM_WORLD,&status);      
+particleShareZ.c:          for(s=0; s<D->nSpecies; s++)
+particleShareZ.c:      MPI_Send(&numP,1, MPI_INT,D->prevXrank,myrank, MPI_COMM_WORLD);    
+particleShareZ.c:    else if(rank%2==0 && rank!=D->L-1) { 
+particleShareZ.c:      MPI_Recv(&numP,1, MPI_INT,D->nextXrank,D->nextXrank,MPI_COMM_WORLD,&status);      
+particleShareZ.c:          for(s=0; s<D->nSpecies; s++)
+particleShareZ.c:      MPI_Send(btP,totalData, MPI_DOUBLE,D->prevXrank,myrank, MPI_COMM_WORLD); 
+particleShareZ.c:    else if(rank%2==0 && rank!=D->L-1) 
+particleShareZ.c:      MPI_Recv(btP,totalData, MPI_DOUBLE,D->nextXrank,D->nextXrank,MPI_COMM_WORLD,&status);     
+periodicBoundary.c:  switch(D->dimension)  {
+periodicBoundary.c:    printf("In particlePush, what dimension(%d)?\n",D->dimension);
+periodicBoundary.c:    particle=D->particle;
+periodicBoundary.c:    sliceN=D->sliceN;
+periodicBoundary.c:    nSpecies=D->nSpecies;
+rearrangeParticles.c:  switch(D->dimension)  {
+rearrangeParticles.c:    printf("In rearrangeParticles, what dimension(%d)?\n",D->dimension);
+rearrangeParticles.c:    particle=D->particle;
+rearrangeParticles.c:    startI=1;  endI=D->subSliceN+1;
+rearrangeParticles.c:    nSpecies=D->nSpecies;
+rearrangeParticles.c:    dPhi=D->numSlice*2*M_PI;
+rearrangeParticles.c:    particle=D->particle;
+rearrangeParticles.c:    istart=D->istart;
+rearrangeParticles.c:    iend=D->iend;
+rearrangeParticles.c:    jstart=D->jstart;
+rearrangeParticles.c:    jend=D->jend;
+rearrangeParticles.c:        for(s=0; s<D->nSpecies; s++)
+rearrangeParticles.c:    particle=D->particle;
+rearrangeParticles.c:    istart=D->istart;
+rearrangeParticles.c:    iend=D->iend;
+rearrangeParticles.c:    jstart=D->jstart;
+rearrangeParticles.c:    jend=D->jend;
+rearrangeParticles.c:    kstart=D->kstart;
+rearrangeParticles.c:    kend=D->kend;
+rearrangeParticles.c:          for(s=0; s<D->nSpecies; s++)
+removeFile.c:  if(D->particleSave==ON)  {
+removeFile.c:    for(n=0; n<=D->maxStep; n+=D->saveStep)  {
+removeFile.c:      if(D->saveParticleMode==TXT) {
+removeFile.c:        LL=D->loadList;
+removeFile.c:      } else if(D->saveParticleMode==HDF) {
+removeFile.c:        LL=D->loadList;
+removeFile.c:  if(D->fieldSave==ON)  {
+removeFile.c:    for(n=0; n<=D->maxStep; n+=D->saveStep)  {
+removeFile.c:      if(D->saveFieldMode==TXT) {
+removeFile.c:      } else if(D->saveParticleMode==HDF) {
+restoreDumpHDF.c:   N=D->nx*D->ny; subSliceN=D->subSliceN; sliceN=D->sliceN;
+restoreDumpHDF.c:   for(h=0; h<D->harmony; h++) {
+restoreDumpHDF.c:     restoreFieldComp(D->U,fileName,dataName,h,sliceN,N,subSliceN,D->saveStep,D->minI);
+restoreDumpHDF.c:     restoreFieldComp(D->Ez,fileName,dataName,h,sliceN,N,subSliceN,D->saveStep,D->minI);
+restoreDumpHDF.c:     p->next=D->head[s]->pt;
+restoreDumpHDF.c:     D->head[s]->pt=p;
+saveDumpHDF.c:   N=D->nx*D->ny;
+saveDumpHDF.c:   startI=1;  endI=D->subSliceN+1;
+saveDumpHDF.c:   for(h=0; h<D->harmony; h++) {
+saveDumpHDF.c:     saveFieldComp(D->U,fileName,dataName,h,N,D->sliceN,D->minI);
+saveDumpHDF.c:     saveFieldComp(D->Ez,fileName,dataName,h,N,D->sliceN,D->minI);
+saveDumpHDF.c:     saveIntMeta(fileName,"sliceN",&D->sliceN,1);
+saveDumpHDF.c:     saveIntMeta(fileName,"harmony",&D->harmony,1);
+saveDumpHDF.c:     saveDoubleMeta(fileName,"minZ",&D->minZ,1);
+saveDumpHDF.c:     saveDoubleMeta(fileName,"dz",&D->dz,1);
+saveDumpHDF.c:     bucketZ=D->numSlice*D->lambda0;
+saveFieldHDF.c:   N=D->nx*D->ny; subSliceN=D->subSliceN; sliceN=D->sliceN;
+saveFieldHDF.c:   for(h=0; h<D->harmony; h++) {
+saveFieldHDF.c:     saveFieldComp(D->U,fileName,dataName,h,sliceN,N,subSliceN,D->saveStep,D->minI);
+saveFieldHDF.c:     saveFieldComp(D->Ez,fileName,dataName,h,sliceN,N,subSliceN,D->saveStep,D->minI);
+saveFieldHDF.c:   if(D->dimension==1) area=2*M_PI*D->spotSigR*D->spotSigR;
+saveFieldHDF.c:   else                area=D->dx*D->dy;
+saveFieldHDF.c:   coef=eMass*velocityC*velocityC*D->ks/eCharge;
+saveFieldHDF.c:   bucketZ=D->numSlice*D->lambda0;
+saveFieldHDF.c:     saveIntMeta(fileName,"sliceN",&D->sliceN,1);
+saveFieldHDF.c:     saveIntMeta(fileName,"harmony",&D->harmony,1);
+saveFieldHDF.c:     saveIntMeta(fileName,"minmax",D->minmax,nTasks+1);
+saveFieldHDF.c:     saveIntMeta(fileName,"nx",&D->nx,1);
+saveFieldHDF.c:     saveIntMeta(fileName,"ny",&D->ny,1);
+saveFieldHDF.c:     saveDoubleMeta(fileName,"minZ",&D->minZ,1);
+saveFieldHDF.c:     saveDoubleMeta(fileName,"dz",&D->dz,1);
+saveFieldHDF.c:     saveDoubleMeta(fileName,"dx",&D->dx,1);
+saveFieldHDF.c:     saveDoubleMeta(fileName,"dy",&D->dy,1);
+saveFieldHDF.c:     saveDoubleMeta(fileName,"minX",&D->minX,1);
+saveFieldHDF.c:     saveDoubleMeta(fileName,"minY",&D->minY,1);
+saveFile.c:    x0=D->dx*iteration+D->minX+D->lambda0*0.5;
+saveFile.c:    bucketX=D->numSlice*D->lambda0;
+saveFile.c:    sliceN=D->sliceN;
+saveFile.c:    switch(D->dimension) {
+saveFile.c:        b=D->bFact[iteration][i][0];
+saveFile.c:    minI=D->minI;
+saveFile.c:    minZ=D->minZ;    minX=D->minX;  minY=D->minY;
+saveFile.c:    dz=D->dz;        dx=D->dx;	    dy=D->dy;
+saveFile.c:    subNz=D->subSliceN; nx=D->nx;      ny=D->ny;
+saveFile.c:    x0=D->dx*iteration+D->minX+D->lambda0*0.5;
+saveFile.c:    bucketX=D->numSlice*D->lambda0;
+saveFile.c:    sliceN=D->sliceN;
+saveFile.c:    harmony=D->harmony;
+saveFile.c://    area=2*M_PI*D->spotSigR*D->spotSigR;
+saveFile.c:    coef=eMass*velocityC*velocityC*D->ks/eCharge;
+saveFile.c://    coef=eMass*D->ks*velocityC*velocityC*sqrt(2.0)/eCharge;
+saveFile.c:    step=iteration%D->saveStep;
+saveFile.c:    switch(D->dimension) {
+saveFile.c:        u=cabs(D->U[step][0][k][j*nx+i]);
+saveFile.c:	    u=cabs(D->U[step][0][k][j*nx+i]);
+saveFile.c:    double x,P[D->harmony],coef1,coef2,coef,area,UR,UI,sum,b,K,KMR,tmp,JJ0,gammaR;
+saveFile.c:    double phase[D->harmony];
+saveFile.c:    harmony=D->harmony;
+saveFile.c:    area=2*M_PI*D->spotSigR*D->spotSigR;
+saveFile.c:    coef1=eMass*velocityC*velocityC*D->ks/eCharge;
+saveFile.c:    if(D->mode==Static) coef=coef2/(D->sliceN*1.0);
+saveFile.c:    else                coef=coef2*(D->lambda0/velocityC*D->numSlice);
+saveFile.c://    area=2*M_PI*D->spotSigR*D->spotSigR;
+saveFile.c://    coef=eMass*velocityC*velocityC*D->ks/eCharge;
+saveFile.c:    switch(D->dimension) {
+saveFile.c:      for(n=0; n<=D->maxStep; n++)
+saveFile.c:        x=n*D->dx;
+saveFile.c:        for(i=0; i<D->sliceN; i++)  {    
+saveFile.c:          b=D->bFact[n][i][0];
+saveFile.c:        b=sum/(D->sliceN*1.0);
+saveFile.c:          for(i=0; i<D->sliceN; i++)  {    
+saveFile.c:            UR=D->UR[n][i][h];
+saveFile.c:            UI=D->UI[n][i][h];
+saveFile.c:	K=D->Kfield[n][0][0];
+saveFile.c:	gammaR=sqrt(D->ks/D->ku*0.5*(1+K*K+P[0]/coef2));
+saveFile.c://	gammaR=sqrt(D->ks/D->ku*0.5*(1+K*K));
+saveFile.c:	KMR=sqrt(sqrt(P[0]/coef)*K*JJ0*D->ks/D->ku);
+saveFile.c:        fprintf(out,"%g %g %g %g\n",K,KMR,gammaR,phase[0]/(D->sliceN*1.0));
+saveFile.c:  minZ=D->minZ;
+saveFile.c:  dPhi=D->numSlice*2*M_PI;
+saveFile.c:  z0=iteration*D->dz;
+saveFile.c:  bucketZ=D->numSlice*D->lambda0;
+saveFile.c:  LL=D->loadList;
+saveFile.c:      p=D->head[s]->pt;
+saveFile.c:    particle=D->particle;
+saveFile.c:    istart=D->istart;    iend=D->iend;
+saveFile.c:    jstart=D->jstart;    jend=D->jend;
+saveFile.c:    kstart=D->kstart;    kend=D->kend;
+saveFile.c:    double rho0[D->nSpecies];
+saveFile.c:    LL=D->loadList;
+saveFile.c:    switch (D->dimension)  {
+saveFile.c:      for(s=0; s<D->nSpecies; s++)
+saveFile.c:        for(i=0; i<iend+3; i++)   D->Rho[i][j][k]=0.0;
+saveFile.c:                D->Rho[l][j][k]+=Wx[ii]*rho0[s]*weight*charge;
+saveFile.c:          x=(i-istart+D->minXSub)*D->dx*D->lambda;
+saveFile.c:          fprintf(out,"%g %g\n",x,D->Rho[i][j][k]);    
+saveFile.c:          D->Rho[i][j][k]=0.0;
+saveFile.c:          for(s=0; s<D->nSpecies; s++)
+saveFile.c:                    D->Rho[l][m][k]+=Wx[ii]*Wy[jj]*rho0[s]*weight;
+saveFile.c:          x=(i-istart+D->minXSub)*D->dx*D->lambda;
+saveFile.c:          y=(j-jstart+D->minYSub)*D->dy*D->lambda;
+saveFile.c:          fprintf(out,"%g %g %g\n",x,y,D->Rho[i][j][k]);    
+saveFile.c:            D->Rho[i][j][k]=0.0;
+saveFile.c:            for(s=0; s<D->nSpecies; s++)
+saveFile.c:                      D->Rho[i1-1+ii][j1-1+jj][k1-1+kk]
+saveFile.c:            x=(i-istart+D->minXSub)*D->dx*D->lambda;
+saveFile.c:            y=(j-jstart+D->minYSub)*D->dy*D->lambda;
+saveFile.c:            z=(k-kstart+D->minZSub)*D->dz*D->lambda;
+saveFile.c:            fprintf(out,"%g %g %g %g\n",x,y,z,D->Rho[i][j][k]);    
+saveFile.c:    istart=D->istart;    iend=D->iend;
+saveFile.c:    jstart=D->jstart;    jend=D->jend;
+saveFile.c:    kstart=D->kstart;    kend=D->kend;
+saveFile.c:    switch(D->dimension) {
+saveFile.c:        x=(i-2+D->minXSub)*D->dx*D->lambda;
+saveFile.c:        Jx=D->Jx[i][j][k]; Jy=D->Jy[i][j][k]; Jz=D->Jz[i][j][k];
+saveFile.c:          x=(i-2+D->minXSub)*D->dx*D->lambda;
+saveFile.c:          y=(j-2+D->minYSub)*D->dy*D->lambda;
+saveFile.c:          Jx=D->Jx[i][j][k]; Jy=D->Jy[i][j][k]; Jz=D->Jz[i][j][k];
+saveParticleHDF.c:    int start,index,totalCnt,cntList[D->nSpecies];
+saveParticleHDF.c:    particle=D->particle;
+saveParticleHDF.c:    startI=1;       endI=D->subSliceN+1;
+saveParticleHDF.c:    minI=D->minI;   maxI=D->maxI;
+saveParticleHDF.c:    cntP = (int **)malloc(D->nSpecies*sizeof(int *));
+saveParticleHDF.c:    for(s=0; s<D->nSpecies; s++)
+saveParticleHDF.c:    for(s=0; s<D->nSpecies; s++)
+saveParticleHDF.c:    bucketZ=D->lambda0*D->numSlice;
+saveParticleHDF.c:    dPhi=2*M_PI*D->numSlice;
+saveParticleHDF.c:      for(s=0; s<D->nSpecies; s++) {
+saveParticleHDF.c:      saveIntMeta(fileName,"species",&D->harmony,1);
+saveParticleHDF.c:      saveDoubleMeta(fileName,"minZ",&D->minZ,1);
+saveParticleHDF.c:      saveDoubleMeta(fileName,"dz",&D->dz,1);
+saveParticleHDF.c:      saveIntMeta(fileName,"sliceN",&D->sliceN,1);
+saveParticleHDF.c:    for(s=0; s<D->nSpecies; s++) free(cntP[s]); free(cntP);
+shiftField.c:   sliceN=D->sliceN;
+shiftField.c:   harmony=D->harmony;
+shiftField.c:     D->UR[h][i][0]=D->UR[h][i-1][0];
+shiftField.c:     D->UI[h][i][0]=D->UI[h][i-1][0];
+solveField.c:   startI=1;   endI=D->subSliceN+1;
+solveField.c:   harmony=D->harmony;
+solveField.c:   dx=D->dx;  dy=D->dy;  dz=D->dz;
+solveField.c:   ks=D->ks;
+solveField.c:   nx=D->nx;  ny=D->ny;
+solveField.c:   if(D->mode==Static || D->currentFlag==0) shift=0; else shift=1;
+solveField.c:   if(shift==0) D->shareFlag=0;
+solveField.c:   else         D->shareFlag=1;
+solveField.c:       memcpy(&(D->tmpU[0]),&(D->U[h][sliceI][0]),nx*ny*sizeof(double complex ));
+solveField.c:           dd[i]=-beta*D->tmpU[(j+1)*nx+i]+(1+2*beta)*D->tmpU[j*nx+i]-beta*D->tmpU[(j-1)*nx+i]+D->Sc[h][sliceI][j*nx+i];
+solveField.c:	 D->U[h][sliceI+shift][j*nx+i]=later;
+solveField.c:	   D->U[h][sliceI+shift][j*nx+i]=later;
+solveField.c:           dd[i]=D->tmpU[j*nx+i]+D->Sc[h][sliceI][j*nx+i];
+solveField.c:	 D->U[h][sliceI+shift][j*nx+i]=later;
+solveField.c:	   D->U[h][sliceI+shift][j*nx+i]=later;
+solveField.c:           dd[i]=D->tmpU[j*nx+i]+D->Sc[h][sliceI][j*nx+i];
+solveField.c:	 D->U[h][sliceI+shift][j*nx+i]=later;
+solveField.c:	   D->U[h][sliceI+shift][j*nx+i]=later;
+solveField.c:   if(D->shareFlag==1) 
+solveField.c:     MPI_Transfer1F_Zplus(D->U,harmony,nx*ny,endI,startI);
+solveField.c:       memcpy(&(D->tmpU[0]),&(D->U[h][sliceI][0]),nx*ny*sizeof(double complex ));
+solveField.c:           dd[j]=-alpha*D->tmpU[j*nx+(i+1)]+(1+2*alpha)*D->tmpU[j*nx+i]-alpha*D->tmpU[j*nx+(i-1)]+D->Sc[h][sliceI][j*nx+i];
+solveField.c:	 D->U[h][sliceI+shift][j*nx+i]=later;
+solveField.c:	   D->U[h][sliceI+shift][j*nx+i]=later;
+solveField.c:           dd[j]=D->tmpU[j*nx+i]+D->Sc[h][sliceI][j*nx+i];
+solveField.c:	 D->U[h][sliceI+shift][j*nx+i]=later;
+solveField.c:	   D->U[h][sliceI+shift][j*nx+i]=later;
+solveField.c:           dd[j]=D->tmpU[j*nx+i]+D->Sc[h][sliceI][j*nx+i];
+solveField.c:	 D->U[h][sliceI+shift][j*nx+i]=later;
+solveField.c:	   D->U[h][sliceI+shift][j*nx+i]=later;
+solveField.c:   if(D->shareFlag==1) 
+solveField.c:     MPI_Transfer1F_Zplus(D->U,harmony,nx*ny,endI,startI);
+solveField.c:   double JJ[D->harmony];
+solveField.c:   startI=1; endI=D->subSliceN+1;
+solveField.c:   harmony=D->harmony;
+solveField.c:   minX=D->minX;	minY=D->minY;
+solveField.c:   nx=D->nx;   ny=D->ny;
+solveField.c:   dx=D->dx;   dy=D->dy;   dz=D->dz;
+solveField.c:   K0=D->K0;
+solveField.c:   kx=D->kx; ky=D->ky;
+solveField.c:   coef=dz*eCharge*eCharge*mu0*0.25/eMass/D->ks/(D->lambda0*D->numSlice)/dx/dy;
+solveField.c:         D->Sc[h][sliceI][N]=0.0+I*0.0;
+solveField.c:     LL=D->loadList;
+solveField.c:       p=D->particle[sliceI].head[s]->pt;
+solveField.c:                 D->Sc[h-1][sliceI][(j+jj)*nx+(i+ii)]+=wx[ii]*wy[jj]*JJ[h-1]*macro_K_invG_expTheta_coef;
+solveField.c:   harmony=D->harmony;
+solveField.c:   startI=1;  endI=D->subSliceN+1;
+solveField.c:   Kr=D->KRef;
+solveField.c:   K0=D->K0;
+solveField.c:   if(D->mode==Time_Dependent) {
+solveField.c:     D->shift+=1.0+(2*(K0-Kr)*Kr+(K0-Kr)*(K0-Kr))/(1.0+Kr*Kr);
+solveField.c:     shift=(int)(D->shift);
+solveField.c:     D->shift-=shift;
+solveField.c:   if(D->mode==Static || D->currentFlag==0) shift=0; else shift=1;
+solveField.c:   if(shift==0) D->shareFlag=0;
+solveField.c:   else         D->shareFlag=1;
+solveField.c:       D->U[h][i+shift][0]=D->U[h][i][0]+D->Sc[h][i][0]*D->currentFlag;
+solveField.c:   double JJ[D->harmony];
+solveField.c:   startI=1; endI=D->subSliceN+1;
+solveField.c:   dz=D->dz;
+solveField.c:   harmony=D->harmony;
+solveField.c:   coef=dz*eCharge*eCharge*mu0*0.5/eMass/D->ks/(D->lambda0*D->numSlice);
+solveField.c:   K0=D->K0;
+solveField.c:       D->Sc[h][i][0]=0.0+I*0.0;
+solveField.c:     LL=D->loadList;
+solveField.c:       p=D->particle[i].head[s]->pt;
+solveField.c:	   D->Sc[h-1][i][0]+=JJ[h-1]*macro_K_invG_expTheta_coef;
+testK_quadG.c:   dz=D->dz;
+testK_quadG.c:   QD=D->qdList;
+testK_quadG.c:   while(QD->next) {
+testK_quadG.c:     for(n=0; n<QD->numbers; n++) {
+testK_quadG.c:       z=QD->qdEnd[n];
+testK_quadG.c:     QD=QD->next; 
+testK_quadG.c:   maxStep=(int)(D->Lz/D->dz);
+testK_quadG.c:   for(i=0; i<D->maxStep; i++) {
+testK_quadG.c:     UL=D->undList;
+testK_quadG.c:     Bx=D->prevBx;
+testK_quadG.c:     By=D->prevBy;
+testK_quadG.c:     K0=1.0/sqrt(2.0)*eCharge*B0/eMass/velocityC/D->ku;
+testK_quadG.c:     QD=D->qdList;
+testK_quadG.c:     while(QD->next) {
+testK_quadG.c:       for(n=0; n<QD->numbers; n++) {
+testK_quadG.c:         if(z>=QD->qdStart[n] && z<QD->qdEnd[n]) {
+testK_quadG.c:           g=QD->g[n];
+testK_quadG.c:       QD=QD->next; 
+twiss.c:   cenI=D->sliceN/2;
+twiss.c:   if(cenI>=D->minI && cenI<D->maxI) {
+twiss.c:     for(s=0; s<D->nSpecies; s++)  {
+twiss.c:       p=D->particle[cenI+1-D->minI].head[s]->pt;
+twiss.c:     D->twsBX[iteration]=(aveX2/cnt)/emittanceX;
+twiss.c:     D->twsGX[iteration]=(aveXPrime/cnt)/emittanceX;
+twiss.c:     D->twsAX[iteration]=-aveCrsX/cnt/emittanceX;
+twiss.c:     D->twsEmitX[iteration]=emittanceX;
+twiss.c://   printf("iteration=%d, sigX=%g, stdX=%g, sigXPrime=%g, stdPx=%g\n",iteration,D->loadList->sigX,sqrt(aveX2/cnt),emittanceX/D->loadList->sigX,sqrt(aveXPrime/cnt));
+twiss.c:     D->twsBY[iteration]=(aveY2/cnt)/emittanceY;
+twiss.c:     D->twsGY[iteration]=(aveYPrime/cnt)/emittanceY;
+twiss.c:     D->twsAY[iteration]=-aveCrsY/cnt/emittanceY;
+twiss.c:     D->twsEmitY[iteration]=emittanceY;
+twiss.c:     D->twsG[iteration]=D->g;
+twiss.c:   dz=D->dz;
+twiss.c:   for(i=0; i<D->maxStep; i++)  { 
+twiss.c:     fprintf(out,"%g %.10g %g %g %g ",i*dz,D->twsEmitX[i],D->twsBX[i],D->twsGX[i],D->twsAX[i]);
+twiss.c:     fprintf(out,"%.10g %g %g %g %g\n",D->twsEmitY[i],D->twsBY[i],D->twsGY[i],D->twsAY[i],D->twsG[i]);
+updateK_quadG.c:   dz=D->dz;
+updateK_quadG.c://   z=(iteration+half)*D->dz+sliceI*D->numSlice*D->lambda0+D->minZ;
+updateK_quadG.c:   z=(iteration+half)*D->dz;
+updateK_quadG.c:   UL=D->undList;
+updateK_quadG.c:   Bx=D->prevBx;
+updateK_quadG.c:   By=D->prevBy;
+updateK_quadG.c:   D->K0=1.0/sqrt(2.0)*eCharge*B0/eMass/velocityC/D->ku;
+updateK_quadG.c:   D->prevBx=Bx;
+updateK_quadG.c:   D->prevBy=By;
+updateK_quadG.c:   if(exist==1 && noCurrent==OFF)     D->currentFlag=1;
+updateK_quadG.c:   else if(exist==1 && noCurrent==ON) D->currentFlag=0;
+updateK_quadG.c:   else	                              D->currentFlag=0;
+updateK_quadG.c:   if(Bx>0 && By==0) { D->kx=D->ku; D->ky=0.0; }
+updateK_quadG.c:   else if(Bx==0 && By>0) { D->kx=0.0; D->ky=D->ku; }
+updateK_quadG.c:   else  { D->kx=0.0; D->ky=0.0; }
+updateK_quadG.c:   QD=D->qdList;
+updateK_quadG.c:   while(QD->next && exist==0) {
+updateK_quadG.c:     for(n=0; n<QD->numbers; n++) {
+updateK_quadG.c:       q0=QD->qdStart[n];
+updateK_quadG.c:       q1=QD->qdEnd[n];
+updateK_quadG.c:         { g=(q1-q0)/dz*2*QD->g[n]; exist=1; n=QD->numbers; }
+updateK_quadG.c:         { g=(x1-q0)/dz*2*QD->g[n]; exist=1; n=QD->numbers; }
+updateK_quadG.c:         { g=(q1-x0)/dz*2*QD->g[n]; exist=1; n=QD->numbers; }
+updateK_quadG.c:         { g=1.0*QD->g[n];        exist=1; n=QD->numbers; }
+updateK_quadG.c:     QD=QD->next; 
+updateK_quadG.c:   D->g=g;
+updateTotalEnergy.c:   N=D->nx*D->ny;
+updateTotalEnergy.c:   harmony=D->harmony;
+updateTotalEnergy.c:   startI=1;  endI=D->subSliceN+1;
+updateTotalEnergy.c:         amp=cabs(D->U[h][i][j]);
+updateTotalEnergy.c:   D->totalEnergy[iteration]=total;
+updateTotalEnergy.c:   N=D->nx*D->ny;
+updateTotalEnergy.c:   harmony=D->harmony;
+updateTotalEnergy.c:   startI=1;  endI=D->subSliceN+1;
+updateTotalEnergy.c:   max=D->maxStep;
+updateTotalEnergy.c:   dz=D->dz;
+updateTotalEnergy.c:   minZ=D->minZ;
+updateTotalEnergy.c:   dt=D->numSlice*D->lambda0/velocityC;
+updateTotalEnergy.c:   area=2*M_PI*D->spotSigR*D->spotSigR;
+updateTotalEnergy.c:   coef=eMass*velocityC*velocityC*D->ks/eCharge;
+updateTotalEnergy.c:   if(D->dimension==1)
+updateTotalEnergy.c:     coef2=coef*coef*eps0*velocityC*D->dx*D->dy;
+updateTotalEnergy.c:printf("1D coef=%g, 3D coef=%g\n",coef/D->dx/D->dx*area,coef);
+updateTotalEnergy.c:   if(D->mode==Time_Dependent) coef2*=dt; else ;
+updateTotalEnergy.c:       MPI_Send(D->totalEnergy,max,MPI_DOUBLE,0,myrank,MPI_COMM_WORLD);
+updateTotalEnergy.c:	 D->totalEnergy[step]+=recvData[step];
+updateTotalEnergy.c:       energy=D->totalEnergy[step];

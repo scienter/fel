@@ -1,0 +1,618 @@
+
+
+*******************************************************************************
+Thu Mar 26 16:12:58 2020
+
+
+FIT:    data read from 'impZ' using 1:2
+        format = x:z
+        x range restricted to [0.00000 : 10.0000]
+        #datapoints = 1001
+        residuals are weighted equally (unit weight)
+
+function used for fitting: a2*x**2+a1*x
+fitted parameters initialized with current variable values
+
+iter      chisq       delta/lim  lambda   a1            a2           
+   0 2.5368082338e+06   0.00e+00  3.19e+01    1.000000e+00   1.000000e+00
+   4 9.8936936977e+01  -7.87e-09  3.19e-03    1.071134e-01  -1.288252e-02
+
+After 4 iterations the fit converged.
+final sum of squares of residuals : 98.9369
+rel. change during last iteration : -7.87122e-14
+
+degrees of freedom    (FIT_NDF)                        : 999
+rms of residuals      (FIT_STDFIT) = sqrt(WSSR/ndf)    : 0.3147
+variance of residuals (reduced chisquare) = WSSR/ndf   : 0.099036
+
+Final set of parameters            Asymptotic Standard Error
+=======================            ==========================
+a1              = 0.107113         +/- 0.00689      (6.432%)
+a2              = -0.0128825       +/- 0.000889     (6.901%)
+
+correlation matrix of the fit parameters:
+                a1     a2     
+a1              1.000 
+a2             -0.968  1.000 
+
+
+*******************************************************************************
+Thu Mar 26 16:13:30 2020
+
+
+FIT:    data read from 'impZ' using 1:2
+        format = x:z
+        x range restricted to [0.00000 : 10.0000]
+        #datapoints = 1001
+        residuals are weighted equally (unit weight)
+
+function used for fitting: f(x)
+	f(x)=a2*x**2+a1*x
+fitted parameters initialized with current variable values
+
+iter      chisq       delta/lim  lambda   a1            a2           
+   0 9.8936936977e+01   0.00e+00  5.98e-01    1.071134e-01  -1.288252e-02
+   1 9.8936936977e+01   0.00e+00  5.98e-02    1.071134e-01  -1.288252e-02
+
+After 1 iterations the fit converged.
+final sum of squares of residuals : 98.9369
+rel. change during last iteration : 0
+
+degrees of freedom    (FIT_NDF)                        : 999
+rms of residuals      (FIT_STDFIT) = sqrt(WSSR/ndf)    : 0.3147
+variance of residuals (reduced chisquare) = WSSR/ndf   : 0.099036
+
+Final set of parameters            Asymptotic Standard Error
+=======================            ==========================
+a1              = 0.107113         +/- 0.00689      (6.432%)
+a2              = -0.0128825       +/- 0.000889     (6.901%)
+
+correlation matrix of the fit parameters:
+                a1     a2     
+a1              1.000 
+a2             -0.968  1.000 
+
+
+*******************************************************************************
+Thu Mar 26 16:14:08 2020
+
+
+FIT:    data read from 'impZ' using 1:2
+        format = x:z
+        x range restricted to [0.00000 : 10.0000]
+        #datapoints = 1001
+        residuals are weighted equally (unit weight)
+
+function used for fitting: f(x)
+	f(x)=a3*x**3+a2*x**2+a1*x
+fitted parameters initialized with current variable values
+
+iter      chisq       delta/lim  lambda   a1            a2            a3           
+   0 1.4334782673e+08   0.00e+00  2.18e+02    1.071134e-01  -1.288252e-02   1.000000e+00
+   6 6.0362944915e+01  -3.32e-04  2.18e-04    4.186597e-01  -1.166795e-01   7.780888e-03
+
+After 6 iterations the fit converged.
+final sum of squares of residuals : 60.3629
+rel. change during last iteration : -3.31964e-09
+
+degrees of freedom    (FIT_NDF)                        : 998
+rms of residuals      (FIT_STDFIT) = sqrt(WSSR/ndf)    : 0.245935
+variance of residuals (reduced chisquare) = WSSR/ndf   : 0.0604839
+
+Final set of parameters            Asymptotic Standard Error
+=======================            ==========================
+a1              = 0.41866          +/- 0.01346      (3.215%)
+a2              = -0.116679        +/- 0.004168     (3.573%)
+a3              = 0.00778089       +/- 0.0003081    (3.96%)
+
+correlation matrix of the fit parameters:
+                a1     a2     a3     
+a1              1.000 
+a2             -0.968  1.000 
+a3              0.917 -0.986  1.000 
+
+
+*******************************************************************************
+Thu Mar 26 16:14:38 2020
+
+
+FIT:    data read from 'impZ' using 1:2
+        format = x:z
+        x range restricted to [0.00000 : 10.0000]
+        #datapoints = 1001
+        residuals are weighted equally (unit weight)
+
+function used for fitting: f(x)
+	f(x)=a4*x**4+a3*x**3+a2*x**2+a1*x
+fitted parameters initialized with current variable values
+
+iter      chisq       delta/lim  lambda   a1            a2            a3            a4           
+   0 1.1161200371e+10   0.00e+00  1.67e+03    4.186597e-01  -1.166795e-01   7.780888e-03   1.000000e+00
+   7 2.4698051785e+01  -8.20e-05  1.67e-04    9.847914e-01  -4.561892e-01   6.716547e-02  -3.165599e-03
+
+After 7 iterations the fit converged.
+final sum of squares of residuals : 24.6981
+rel. change during last iteration : -8.20097e-10
+
+degrees of freedom    (FIT_NDF)                        : 997
+rms of residuals      (FIT_STDFIT) = sqrt(WSSR/ndf)    : 0.157392
+variance of residuals (reduced chisquare) = WSSR/ndf   : 0.0247724
+
+Final set of parameters            Asymptotic Standard Error
+=======================            ==========================
+a1              = 0.984791         +/- 0.01723      (1.749%)
+a2              = -0.456189        +/- 0.009337     (2.047%)
+a3              = 0.0671655        +/- 0.001577     (2.349%)
+a4              = -0.0031656       +/- 8.343e-05    (2.636%)
+
+correlation matrix of the fit parameters:
+                a1     a2     a3     a4     
+a1              1.000 
+a2             -0.968  1.000 
+a3              0.917 -0.986  1.000 
+a4             -0.866  0.958 -0.992  1.000 
+
+
+*******************************************************************************
+Thu Mar 26 16:14:53 2020
+
+
+FIT:    data read from 'impZ' using 1:2
+        format = x:z
+        x range restricted to [0.00000 : 10.0000]
+        #datapoints = 1001
+        residuals are weighted equally (unit weight)
+
+function used for fitting: f(x)
+	f(x)=a4*x**4+a3*x**3+a2*x**2+a1*x
+fitted parameters initialized with current variable values
+
+iter      chisq       delta/lim  lambda   a1            a2            a3           
+   0 2.4698051785e+01   0.00e+00  1.91e+01    9.847914e-01  -4.561892e-01   6.716547e-02
+   1 2.4698051785e+01  -1.29e-10  1.91e+00    9.847914e-01  -4.561892e-01   6.716547e-02
+
+After 1 iterations the fit converged.
+final sum of squares of residuals : 24.6981
+rel. change during last iteration : -1.29461e-15
+
+degrees of freedom    (FIT_NDF)                        : 998
+rms of residuals      (FIT_STDFIT) = sqrt(WSSR/ndf)    : 0.157314
+variance of residuals (reduced chisquare) = WSSR/ndf   : 0.0247475
+
+Final set of parameters            Asymptotic Standard Error
+=======================            ==========================
+a1              = 0.984791         +/- 0.00861      (0.8743%)
+a2              = -0.456189        +/- 0.002666     (0.5845%)
+a3              = 0.0671655        +/- 0.0001971    (0.2934%)
+
+correlation matrix of the fit parameters:
+                a1     a2     a3     
+a1              1.000 
+a2             -0.968  1.000 
+a3              0.917 -0.986  1.000 
+
+
+*******************************************************************************
+Thu Mar 26 16:15:17 2020
+
+
+FIT:    data read from 'impZ' using 1:2
+        format = x:z
+        x range restricted to [0.00000 : 10.0000]
+        #datapoints = 1001
+        residuals are weighted equally (unit weight)
+
+function used for fitting: f(x)
+	f(x)=a5*x**5+a4*x**4+a3*x**3+a2*x**2+a1*x
+fitted parameters initialized with current variable values
+
+iter      chisq       delta/lim  lambda   a1            a2            a3            a4            a5           
+   0 9.1409920459e+11   0.00e+00  1.35e+04    9.847914e-01  -4.561892e-01   6.716547e-02  -3.165599e-03   1.000000e+00
+   8 7.4217455070e+00  -2.20e-04  1.35e-04    1.638207e+00  -1.065740e+00   2.499398e-01  -2.508761e-02   9.129623e-04
+
+After 8 iterations the fit converged.
+final sum of squares of residuals : 7.42175
+rel. change during last iteration : -2.20018e-09
+
+degrees of freedom    (FIT_NDF)                        : 996
+rms of residuals      (FIT_STDFIT) = sqrt(WSSR/ndf)    : 0.0863224
+variance of residuals (reduced chisquare) = WSSR/ndf   : 0.00745155
+
+Final set of parameters            Asymptotic Standard Error
+=======================            ==========================
+a1              = 1.63821          +/- 0.01654      (1.009%)
+a2              = -1.06574         +/- 0.01366      (1.281%)
+a3              = 0.24994          +/- 0.003893     (1.558%)
+a4              = -0.0250876       +/- 0.0004576    (1.824%)
+a5              = 0.000912962      +/- 1.896e-05    (2.077%)
+
+correlation matrix of the fit parameters:
+                a1     a2     a3     a4     a5     
+a1              1.000 
+a2             -0.968  1.000 
+a3              0.917 -0.986  1.000 
+a4             -0.866  0.958 -0.992  1.000 
+a5              0.821 -0.927  0.975 -0.995  1.000 
+
+
+*******************************************************************************
+Thu Mar 26 16:15:43 2020
+
+
+FIT:    data read from 'impZ' using 1:2
+        format = x:z
+        x range restricted to [0.00000 : 10.0000]
+        #datapoints = 1001
+        residuals are weighted equally (unit weight)
+
+function used for fitting: f(x)
+	f(x)=a5*x**5+a4*x**4+a3*x**3+a2*x**2+a1*x+a6*x**6
+fitted parameters initialized with current variable values
+
+iter      chisq       delta/lim  lambda   a1            a2            a3            a4            a5            a6           
+   0 7.7424076961e+13   0.00e+00  1.14e+05    1.638207e+00  -1.065740e+00   2.499398e-01  -2.508761e-02   9.129623e-04   1.000000e+00
+   9 4.2907331063e+00  -1.42e-03  1.14e-04    2.061568e+00  -1.629941e+00   5.037041e-01  -7.581526e-02   5.560687e-03  -1.592714e-04
+
+After 9 iterations the fit converged.
+final sum of squares of residuals : 4.29073
+rel. change during last iteration : -1.41642e-08
+
+degrees of freedom    (FIT_NDF)                        : 995
+rms of residuals      (FIT_STDFIT) = sqrt(WSSR/ndf)    : 0.0656681
+variance of residuals (reduced chisquare) = WSSR/ndf   : 0.00431229
+
+Final set of parameters            Asymptotic Standard Error
+=======================            ==========================
+a1              = 2.06157          +/- 0.02013      (0.9763%)
+a2              = -1.62994         +/- 0.02337      (1.434%)
+a3              = 0.503704         +/- 0.009872     (1.96%)
+a4              = -0.0758153       +/- 0.001915     (2.525%)
+a5              = 0.00556069       +/- 0.0001731    (3.113%)
+a6              = -0.000159271     +/- 5.911e-06    (3.711%)
+
+correlation matrix of the fit parameters:
+                a1     a2     a3     a4     a5     a6     
+a1              1.000 
+a2             -0.968  1.000 
+a3              0.917 -0.986  1.000 
+a4             -0.866  0.958 -0.992  1.000 
+a5              0.821 -0.927  0.975 -0.995  1.000 
+a6             -0.781  0.896 -0.954  0.983 -0.997  1.000 
+
+
+*******************************************************************************
+Thu Mar 26 16:16:24 2020
+
+
+FIT:    data read from 'impZ' using 1:2
+        format = x:z
+        x range restricted to [0.00000 : 10.0000]
+        #datapoints = 1001
+        residuals are weighted equally (unit weight)
+
+function used for fitting: f(x)
+	f(x)=a5*x**5+a4*x**4+a3*x**3+a2*x**2+a1*x+a6*x**6+a7*x**7
+fitted parameters initialized with current variable values
+
+iter      chisq       delta/lim  lambda   a1            a2            a3            a4            a5            a6            a7           
+   0 6.7167833330e+15   0.00e+00  9.79e+05    2.061568e+00  -1.629941e+00   5.037041e-01  -7.581526e-02   5.560687e-03  -1.592714e-04   1.000000e+00
+  10 4.2550856709e+00  -7.24e-03  9.79e-05    1.996869e+00  -1.513541e+00   4.309901e-01  -5.449638e-02   2.364440e-03   7.804639e-05  -6.918337e-06
+
+After 10 iterations the fit converged.
+final sum of squares of residuals : 4.25509
+rel. change during last iteration : -7.24472e-08
+
+degrees of freedom    (FIT_NDF)                        : 994
+rms of residuals      (FIT_STDFIT) = sqrt(WSSR/ndf)    : 0.0654276
+variance of residuals (reduced chisquare) = WSSR/ndf   : 0.00428077
+
+Final set of parameters            Asymptotic Standard Error
+=======================            ==========================
+a1              = 1.99687          +/- 0.03008      (1.506%)
+a2              = -1.51354         +/- 0.04658      (3.077%)
+a3              = 0.43099          +/- 0.02705      (6.276%)
+a4              = -0.0544964       +/- 0.00763      (14%)
+a5              = 0.00236444       +/- 0.001121     (47.41%)
+a6              = 7.80464e-05      +/- 8.245e-05    (105.6%)
+a7              = -6.91834e-06     +/- 2.397e-06    (34.65%)
+
+correlation matrix of the fit parameters:
+                a1     a2     a3     a4     a5     a6     a7     
+a1              1.000 
+a2             -0.968  1.000 
+a3              0.917 -0.986  1.000 
+a4             -0.866  0.958 -0.992  1.000 
+a5              0.821 -0.927  0.975 -0.995  1.000 
+a6             -0.781  0.896 -0.954  0.983 -0.997  1.000 
+a7              0.745 -0.866  0.932 -0.968  0.988 -0.997  1.000 
+
+
+*******************************************************************************
+Thu Mar 26 16:17:14 2020
+
+
+FIT:    data read from 'impZ' using 1:2
+        format = x:z
+        x range restricted to [0.00000 : 10.0000]
+        #datapoints = 1001
+        residuals are weighted equally (unit weight)
+
+function used for fitting: f(x)
+	f(x)=a0*exp(-(x-b1)*(x-b1))
+fitted parameters initialized with current variable values
+
+iter      chisq       delta/lim  lambda   a0            b1           
+   0 1.2881388405e+01   0.00e+00  3.40e-01    1.000000e+00   1.000000e+00
+   3 2.9314606182e+00  -2.86e-03  3.40e-04    9.825817e-01   1.296769e+00
+
+After 3 iterations the fit converged.
+final sum of squares of residuals : 2.93146
+rel. change during last iteration : -2.86265e-08
+
+degrees of freedom    (FIT_NDF)                        : 999
+rms of residuals      (FIT_STDFIT) = sqrt(WSSR/ndf)    : 0.0541701
+variance of residuals (reduced chisquare) = WSSR/ndf   : 0.0029344
+
+Final set of parameters            Asymptotic Standard Error
+=======================            ==========================
+a0              = 0.982582         +/- 0.00485      (0.4936%)
+b1              = 1.29677          +/- 0.005025     (0.3875%)
+
+correlation matrix of the fit parameters:
+                a0     b1     
+a0              1.000 
+b1             -0.013  1.000 
+
+
+*******************************************************************************
+Thu Mar 26 16:17:45 2020
+
+
+FIT:    data read from 'impZ' using 1:2
+        format = x:z
+        x range restricted to [0.00000 : 10.0000]
+        #datapoints = 1001
+        residuals are weighted equally (unit weight)
+
+function used for fitting: f(x)
+	f(x)=a1*exp(-(x-b1)*(x-b1))
+fitted parameters initialized with current variable values
+
+iter      chisq       delta/lim  lambda   a1            b1           
+   0 1.3127500943e+02   0.00e+00  8.07e-01    1.996869e+00   1.296769e+00
+   3 2.9314606183e+00   0.00e+00  8.07e+04    9.825817e-01   1.296769e+00
+
+After 3 iterations the fit converged.
+final sum of squares of residuals : 2.93146
+rel. change during last iteration : 0
+
+degrees of freedom    (FIT_NDF)                        : 999
+rms of residuals      (FIT_STDFIT) = sqrt(WSSR/ndf)    : 0.0541701
+variance of residuals (reduced chisquare) = WSSR/ndf   : 0.0029344
+
+Final set of parameters            Asymptotic Standard Error
+=======================            ==========================
+a1              = 0.982582         +/- 0.00485      (0.4936%)
+b1              = 1.29677          +/- 0.005025     (0.3875%)
+
+correlation matrix of the fit parameters:
+                a1     b1     
+a1              1.000 
+b1             -0.013  1.000 
+
+
+*******************************************************************************
+Thu Mar 26 16:18:20 2020
+
+
+FIT:    data read from 'impZ' using 1:2
+        format = x:z
+        x range restricted to [0.00000 : 10.0000]
+        #datapoints = 1001
+        residuals are weighted equally (unit weight)
+
+function used for fitting: f(x)
+	f(x)=a1*exp(-(x-b1)**2)+a2*exp(-(x-b2)**2)
+fitted parameters initialized with current variable values
+
+iter      chisq       delta/lim  lambda   a1            b1            a2            b2           
+   0 2.8341976502e+02   0.00e+00  4.60e-01    9.825817e-01   1.296769e+00  -1.513541e+00   1.000000e+00
+ 145 2.6604952954e+00  -9.09e-01  4.60e-02    1.004226e+00   1.261346e+00  -2.431835e-01  -7.660520e-01
+
+After 145 iterations the fit converged.
+final sum of squares of residuals : 2.6605
+rel. change during last iteration : -9.09187e-06
+
+degrees of freedom    (FIT_NDF)                        : 997
+rms of residuals      (FIT_STDFIT) = sqrt(WSSR/ndf)    : 0.0516575
+variance of residuals (reduced chisquare) = WSSR/ndf   : 0.0026685
+
+Final set of parameters            Asymptotic Standard Error
+=======================            ==========================
+a1              = 1.00423          +/- 0.008239     (0.8205%)
+b1              = 1.26135          +/- 0.008589     (0.6809%)
+a2              = -0.243184        +/- 0.1457       (59.92%)
+b2              = -0.766052        +/- 0.3489       (45.54%)
+
+correlation matrix of the fit parameters:
+                a1     b1     a2     b2     
+a1              1.000 
+b1             -0.687  1.000 
+a2              0.727 -0.658  1.000 
+b2              0.783 -0.734  0.986  1.000 
+
+
+*******************************************************************************
+Thu Mar 26 16:19:25 2020
+
+
+FIT:    data read from 'impZ' using 1:2
+        format = x:z
+        x range restricted to [0.00000 : 10.0000]
+        #datapoints = 1001
+        residuals are weighted equally (unit weight)
+
+function used for fitting: f(x)
+	f(x)=a1*(x-b1)**2+a2/x
+fitted parameters initialized with current variable values
+
+
+Current data point
+=========================
+#               = 1 out of 1001
+x               = 1.00423        
+z               = 0              
+
+Current set of parameters
+=========================
+a1              = 1.00423        
+b1              = 1.26135        
+a2              = -0.243184      
+
+BREAK: Undefined value during function evaluation
+
+*******************************************************************************
+Thu Mar 26 16:19:49 2020
+
+
+FIT:    data read from 'impZ' using 1:2
+        format = x:z
+        x range restricted to [0.00000 : 10.0000]
+        #datapoints = 1001
+        residuals are weighted equally (unit weight)
+
+function used for fitting: f(x)
+	f(x)=a1*(x-b1)**2+a2/x
+fitted parameters initialized with current variable values
+
+
+Current data point
+=========================
+#               = 1 out of 1001
+x               = 1.00423        
+z               = 0              
+
+Current set of parameters
+=========================
+a1              = 1.00423        
+a2              = -0.243184      
+
+BREAK: Undefined value during function evaluation
+
+*******************************************************************************
+Thu Mar 26 16:19:58 2020
+
+
+FIT:    data read from 'impZ' using 1:2
+        format = x:z
+        x range restricted to [0.00000 : 10.0000]
+        #datapoints = 1001
+        residuals are weighted equally (unit weight)
+
+function used for fitting: f(x)
+	f(x)=a1*x**2+a2/x
+fitted parameters initialized with current variable values
+
+
+Current data point
+=========================
+#               = 1 out of 1001
+x               = 1.00423        
+z               = 0              
+
+Current set of parameters
+=========================
+a1              = 1.00423        
+a2              = -0.243184      
+
+BREAK: Undefined value during function evaluation
+
+*******************************************************************************
+Thu Mar 26 16:20:28 2020
+
+
+FIT:    data read from 'impZ' using 1:2
+        format = x:z
+        x range restricted to [0.00000 : 10.0000]
+        #datapoints = 1001
+        residuals are weighted equally (unit weight)
+
+function used for fitting: f(x)
+	f(x)=a1*x**2+a2*x+b1/x
+fitted parameters initialized with current variable values
+
+
+Current data point
+=========================
+#               = 1 out of 1001
+x               = 1.00423        
+z               = 0              
+
+Current set of parameters
+=========================
+a1              = 1.00423        
+a2              = -0.243184      
+b1              = 1.26135        
+
+BREAK: Undefined value during function evaluation
+
+*******************************************************************************
+Thu Mar 26 16:21:04 2020
+
+
+FIT:    data read from 'impZ' using 1:2
+        format = x:z
+        x range restricted to [0.00000 : 10.0000]
+        #datapoints = 1001
+        residuals are weighted equally (unit weight)
+
+function used for fitting: f(x)
+	f(x)=a2*x**2+a1*x+b1/x
+fitted parameters initialized with current variable values
+
+Warning: Initial value of parameter 'a1' is zero.
+Warning: Initial value of parameter 'a2' is zero.
+Warning: Initial value of parameter 'b1' is zero.
+
+Current data point
+=========================
+#               = 1 out of 1001
+x               = 1e-30          
+z               = 0              
+
+Current set of parameters
+=========================
+a1              = 1e-30          
+a2              = 1e-30          
+b1              = 1e-30          
+
+BREAK: Undefined value during function evaluation
+
+*******************************************************************************
+Thu Mar 26 16:21:15 2020
+
+
+FIT:    data read from 'impZ' using 1:2
+        format = x:z
+        x range restricted to [0.00000 : 10.0000]
+        #datapoints = 1001
+        residuals are weighted equally (unit weight)
+
+function used for fitting: f(x)
+	f(x)=a2*x**2+a1*x+b1/x
+fitted parameters initialized with current variable values
+
+
+Current data point
+=========================
+#               = 1 out of 1001
+x               = 1e-30          
+z               = 0              
+
+Current set of parameters
+=========================
+a1              = 1e-30          
+a2              = 1e-30          
+b1              = 1e-30          
+
+BREAK: Undefined value during function evaluation

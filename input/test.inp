@@ -1,0 +1,177 @@
+[Save]
+ field_save=ON
+ particle_save=ON
+ density_save=OFF
+ current_save=OFF
+ dump_save=OFF
+
+ field_format=TXT
+ particle_format=TXT
+ current_format=TXT
+ density_format=TXT
+ dump_format=HDF
+
+ dump_start=1000
+ dump_step=1000
+
+ max_time=3500			//[minute]
+
+// max_step=10
+ total_length=50		//[m]
+ save_step=10
+ save_start=0
+
+[Domain]
+
+ dimension=1
+// mode=Static
+ mode=Time_Dependent
+
+ rangeZ=12			// [um]  For Time_Dependant
+ minX=-80			// [um]
+ maxX=80				// [um]
+ minY=-80			// [um]
+ maxY=80				// [um]
+ nx=100
+ ny=100
+ number_lambda_s=1		// [ea] For Static, number of lambdas
+
+
+ harmony=1
+ zmode=1			// number of Ez mode
+
+ ref_energy=8275			// [MeV]
+ slices_in_bucket=10
+
+ lambdaUs_in_iteration=10	// number of lambdaU for one iteration
+
+[Seed]
+ power=1e3			// [W]
+ duration=20e-15		// [s]
+ spot_sigma_R=35		// [um]
+
+[Phase_shifter]
+ position = 36			// [m]
+ value = 0			// [pi]
+
+
+[Undulator]
+ numbers=20
+ air=OFF
+ linear_taper = -0.00	// [T/number undulator]
+ quad_taper = -0.000013		// [T/number undulator]
+ slope_of_B = -0.00		// [T/m]
+ lambdaU = 2.6			// [cm]
+
+ unit_start = 0			// [m]
+ unit_end = 6			// [m]
+ undulator_start = 0.5		// [m]
+ undulator_end = 5.5		// [m]
+ Bx = 0				// [T]
+ By=0.772			// [T]
+
+
+[Quad]
+ numbers=20
+
+ unit_start = -0.1		// [m]
+ unit_end = 11.9		// [m]
+ quad_start = -0.1		// [m]
+ quad_end = 0.1			// [m]
+ g = 15				// [T/m]
+
+[Quad]
+ numbers=20
+
+ unit_start = 5.9		// [m]
+ unit_end = 17.9		// [m]
+ quad_start = 5.9		// [m]
+ quad_end = 6.1			// [m]
+ g = -15			// [T/m]
+
+
+[EBeam]
+ load_type = Polygon
+ noise_ONOFF = OFF
+
+ species=Electron
+ beam_energy=8275		// [MeV]
+ energy_spread=0.01		// [%]
+ peak_current=4000		// [A]
+ norm_emittance_x=0.7             // [mm mrad]
+ norm_emittance_y=0.7             // [mm mrad]
+ rms_sigma_x=35			// [um]
+ rms_sigma_y=35              	// [um]
+ beamlets_in_bucket=200
+ number_in_beamlet=2
+ energy_tune=0.5e-3
+
+ Znodes=21
+ Z0=-5e-6
+ Z1=-4.5e-6
+ Z2=-4.0e-6
+ Z3=-3.5e-6
+ Z4=-3.0e-6
+ Z5=-2.5e-6
+ Z6=-2.0e-6
+ Z7=-1.5e-6
+ Z8=-1.0e-6
+ Z9=-0.5e-6
+ Z10=0e-6
+ Z11=0.5e-6
+ Z12=1.0e-6
+ Z13=1.5e-6
+ Z14=2.0e-6
+ Z15=2.5e-6
+ Z16=3.0e-6
+ Z17=3.5e-6
+ Z18=4.0e-6
+ Z19=4.5e-6
+ Z20=5.0e-6
+
+ Zn0=1
+ Zn1=1
+ Zn2=1
+ Zn3=1
+ Zn4=1
+ Zn5=1
+ Zn6=1
+ Zn7=1
+ Zn8=1
+ Zn9=1
+ Zn10=1
+ Zn11=1
+ Zn12=1
+ Zn13=1
+ Zn14=1
+ Zn15=1
+ Zn16=1
+ Zn17=1
+ Zn18=1
+ Zn19=1
+ Zn20=1
+
+ Zenergy0=0.000
+ Zenergy1=0.707
+ Zenergy2=1.000
+ Zenergy3=0.707
+ Zenergy4=0.000
+ Zenergy5=-0.707
+ Zenergy6=-1.000
+ Zenergy7=-0.707
+ Zenergy8=0.000
+ Zenergy9=0.707
+ Zenergy10=1.000
+ Zenergy11=0.707
+ Zenergy12=0.000
+ Zenergy13=-0.707
+ Zenergy14=-1.000
+ Zenergy15=-0.707
+ Zenergy16=0.000
+ Zenergy17=0.707
+ Zenergy18=1.000
+ Zenergy19=0.707
+ Zenergy20=0.000
+
+
+ 

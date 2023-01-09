@@ -1,0 +1,157 @@
+[Save]
+ field_save=ON
+ particle_save=ON
+ density_save=OFF
+ current_save=OFF
+ dump_save=OFF
+
+ field_format=TXT
+ particle_format=TXT
+ current_format=TXT
+ density_format=TXT
+ dump_format=HDF
+
+ dump_start=1000
+ dump_step=1000
+
+ max_time=3500			//[minute]
+
+// max_step=10
+ total_length=5		 //		//[m]
+ save_step=14
+ save_start=0
+
+[Domain]
+
+ dimension=3
+// mode=Static
+// mode=Twiss
+ mode=Time_Dependent
+
+ rangeZ=6000			// [um]  For Time_Dependant
+ minX=-3000			// [um]
+ maxX=3000				// [um]
+ minY=-3000			// [um]
+ maxY=3000				// [um]
+ nx=40
+ ny=40
+ number_lambda_s=1		// [ea] For Static, number of lambdas
+
+
+ harmony=1
+ zmode=1			// number of Ez mode
+
+ ref_energy=35			// [MeV]
+ slices_in_bucket=1
+
+ lambdaUs_in_iteration=1	// number of lambdaU for one iteration
+
+[Seed]
+ power=0.00  //0e4			// [W]
+ rms_duration=6.67e4 //50		// [fs]
+ spot_sigma_R=1000  //91.87		// [um]
+ focus=0    //0.7			// [m]
+
+[Phase_shifter]
+ position = 36			// [m]
+ value = 0			// [pi]
+
+
+[Undulator]
+ numbers=1
+ air=ON
+ linear_taper = -0.00	// [T/number undulator]
+ quad_taper = -0.0		// [T/number undulator]
+ slope_of_B = -0.00		// [T/m]
+ lambdaU = 3.5			// [cm]
+
+ unit_start = 0.0			// [m]
+ unit_end = 5			// [m]
+ undulator_start = 0.0		// [m]
+ undulator_end = 5		// [m]
+ Bx = 0				// [T]
+ By= 1.0162			// [T]
+
+
+[Wake_field]
+ activate = OFF
+ shape = Flat
+ ac_dc = AC
+ radius = 4.5e-3		// [m]
+ conductivity = 3.03e7		// 
+ ctau = 2.4e-6			// relaxation_time X c [m]
+ 
+
+[Quad]
+ numbers=20
+
+ unit_start = -0.2		// [m]
+ unit_end = 14			// [m]
+ quad_start = -0.1		// [m]
+ quad_end = 0.1			// [m]
+ g = 0				// [T/m]
+
+
+[EBeam]
+ load_type = Polygon
+ noise_ONOFF = ON
+
+ species=Electron
+ beam_energy=35		// [MeV]
+ energy_spread=0.1		// [%]
+ peak_current=531.555   //265.778		// [A]
+ norm_emittance_x=2             // [mm mrad]
+ norm_emittance_y=2             // [mm mrad]
+ beta_x=4.219	//2.729			// [m]
+ beta_y=0.2796	//3.0             	// [m]
+ alpha_x=2.345	
+ alpha_y=0.021023
+ beamlets_in_bucket=1000
+ number_in_beamlet=4
+
+ Znodes=15
+ Z0=-1.28e-3
+ Z1=-1.10e-3
+ Z2=-0.91e-3
+ Z3=-0.73e-3
+ Z4=-0.50e-3
+ Z5=-0.37e-3
+ Z6=-0.18e-3
+ Z7=0.00e-3
+ Z8=0.18e-3
+ Z9=0.37e-3
+ Z10=0.50e-3
+ Z11=0.73e-3
+ Z12=0.91e-3
+ Z13=1.10e-3
+ Z14=1.28e-3
+ Zn0=0.018
+ Zn1=0.053
+ Zn2=0.130
+ Zn3=0.271
+ Zn4=0.480
+ Zn5=0.721
+ Zn6=0.922
+ Zn7=1.000
+ Zn8=0.922
+ Zn9=0.721
+ Zn10=0.480
+ Zn11=0.271
+ Zn12=0.130
+ Zn13=0.053
+ Zn14=0.018
+ Zenergy0=1
+ Zenergy1=1
+ Zenergy2=1
+ Zenergy3=1
+ Zenergy4=1
+ Zenergy5=1
+ Zenergy6=1
+ Zenergy7=1
+ Zenergy8=1
+ Zenergy9=1
+ Zenergy10=1
+ Zenergy11=1
+ Zenergy12=1
+ Zenergy13=1
+ Zenergy14=1

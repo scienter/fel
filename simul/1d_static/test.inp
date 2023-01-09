@@ -1,0 +1,118 @@
+[Save]
+ field_save=ON
+ particle_save=ON
+ density_save=OFF
+ current_save=OFF
+ dump_save=OFF
+
+ field_format=TXT
+ particle_format=TXT
+ current_format=TXT
+ density_format=TXT
+ dump_format=HDF
+
+ dump_start=1000
+ dump_step=1000
+
+ max_time=3500			//[minute]
+
+// max_step=10
+ total_length=12		//[m]
+ save_step=10
+ save_start=0
+
+[Domain]
+
+ dimension=1
+ mode=Static
+// mode=Twiss
+// mode=Time_Dependent
+
+ rangeZ=400			// [um]  For Time_Dependant
+ minX=-1000			// [um]
+ maxX=1000				// [um]
+ minY=-1000			// [um]
+ maxY=1000				// [um]
+ nx=200
+ ny=200
+ number_lambda_s=1		// [ea] For Static, number of lambdas
+
+
+ harmony=1
+ zmode=1			// number of Ez mode
+
+ ref_energy=200			// [MeV]
+ slices_in_bucket=2
+
+ lambdaUs_in_iteration=2	// number of lambdaU for one iteration
+
+[Seed]
+ power=1e4			// [W]
+ rms_duration=50		// [fs]
+ spot_sigma_R=91.87		// [um]
+ focus=0.7			// [m]
+
+[Phase_shifter]
+ position = 36			// [m]
+ value = 0			// [pi]
+
+
+[Undulator]
+ numbers=1
+ air=ON
+ linear_taper = -0.00	// [T/number undulator]
+ quad_taper = -0.0		// [T/number undulator]
+ slope_of_B = -0.00		// [T/m]
+ lambdaU = 2.8			// [cm]
+
+ unit_start = 0.0			// [m]
+ unit_end = 100			// [m]
+ undulator_start = 0.0		// [m]
+ undulator_end = 100		// [m]
+ Bx = 0				// [T]
+ By= 0.74588			// [T]
+
+
+[Quad]
+ numbers=20
+
+ unit_start = -0.2		// [m]
+ unit_end = 14			// [m]
+ quad_start = -0.1		// [m]
+ quad_end = 0.1			// [m]
+ g = 0				// [T/m]
+
+[Wake_field]
+ activate = OFF
+ shape = Flat
+ ac_dc = AC
+ radius = 4.5e-3                // [m]
+ conductivity = 3.03e7          //
+ ctau = 2.4e-6                  // relaxation_time X c [m]
+
+[EBeam]
+ load_type = Polygon
+ noise_ONOFF = OFF
+
+ species=Electron
+ beam_energy=200		// [MeV]
+ energy_spread=0.01		// [%]
+ peak_current=110		// [A]
+ norm_emittance_x=1             // [mm mrad]
+ norm_emittance_y=1             // [mm mrad]
+ beta_x=3.555			// [m]
+ beta_y=3.555             	// [m]
+ alpha_x=0.0			
+ alpha_y=0.0             	
+ beamlets_in_bucket=2000
+ number_in_beamlet=2
+
+ Znodes=2
+ Z0=-150e-6
+ Z1=150e-6
+ Zn0=1
+ Zn1=1
+ Zenergy0=1
+ Zenergy1=1
+
+ 
