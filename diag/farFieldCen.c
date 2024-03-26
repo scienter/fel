@@ -14,10 +14,9 @@ void restore_Field_HDF(double *data,char *fileName,char *dataName,int sliceN,int
 
 void main(int argc, char *argv[])
 {
-   int division,step,i,j,ii,jj,kk,sliceN,h,H,numHarmony,n,numR,stSlice;
+   int division,step,i,j,ii,jj,sliceN,h,H,numHarmony,n,numR,stSlice;
    int subP,nx,ny,NX,NY,N,sliceI,initIndex,sum,*subCnt,*start,*harmony;
-	int cnt,*sliceList;
-   double z0,z,targetZ,dz,bucketZ,minZ,minX,minY,real,imag,powerCoef,L;
+   double z0,z,targetZ,dz,bucketZ,minZ,minX,minY,real,imag,powerCoef;
    double minTX,minTY,dx,dy,dX,dY,x,y,X,Y,coef,coef2,phase,k0,rangeR;
    double *U,*Ez;
 	double complex **crossSum,compVal;
@@ -52,10 +51,6 @@ void main(int argc, char *argv[])
    harmony = (int *)malloc(numHarmony*sizeof(int ));
    restoreIntMeta(fileName,"harmony",harmony,numHarmony);
    for(h=0; h<numHarmony; h++) printf("harmony[%d]=%d\n",h,harmony[h]);
-	cnt = (int)(sliceN/stSlice);
-   sliceList = (int *)malloc(cnt*sizeof(int ));
-   for(n=1; n<=cnt; n++) 
-		sliceList[n-1]=n*stSlice;
 
    restoreIntMeta(fileName,"nx",&nx,1);
    restoreIntMeta(fileName,"ny",&ny,1);
@@ -75,7 +70,7 @@ void main(int argc, char *argv[])
      crossSum[i]=(double complex *)malloc(NY*sizeof(double complex));
 
    subCnt=(int *)malloc(division*sizeof(int ));
-   start=(int *)malloc((division+1)*sizeof(int ));
+   start=(int *)malloc(division*sizeof(int ));
    subP=sliceN/division;
    for(i=0; i<division-1; i++) subCnt[i]=subP;
    subCnt[division-1]=sliceN-subP*(division-1);
@@ -86,10 +81,9 @@ void main(int argc, char *argv[])
      start[n]=sum;
      sum+=subCnt[n];
    }
-	start[division]=sliceN;
 	
+
    z0=minZ+step*dz;
-	L = targetZ - z0;
    for(h=0; h<numHarmony; h++) {
      H=harmony[h];
 
@@ -106,36 +100,34 @@ void main(int argc, char *argv[])
        restore_Field_HDF(U,fileName,dataName,sliceN,subCnt[n],start[n],N);
 
        // crossSum 
-       for(sliceI=start[n]; sliceI<start[n+1]; sliceI++) {
-		 	for(kk=0; kk<cnt; kk++) {
-				if(sliceI==sliceList[kk]) {
-         		z=z0+sliceI*bucketZ;
+       for(sliceI=start[n]; sliceI<start[n+1]; sliceI+=stSlice) {
+         z=z0+sliceI*bucketZ;
 
-		         initIndex=(sliceI-start[n])*nx*ny*2;
-      		   for(i=0; i<nx; i++) {
-		           x=i*dx+minX;
-      		     for(j=0; j<ny; j++) {
-		             y=j*dy+minY;
-      		       real=U[initIndex+j*nx*2+i*2+0]*coef2;
-            		 imag=U[initIndex+j*nx*2+i*2+1]*coef2;
-						 compVal=real+I*imag;
+         initIndex=(sliceI-start[n])*nx*ny*2;
+         for(i=0; i<nx; i++) {
+           x=i*dx+minX;
+           for(j=0; j<ny; j++) {
+             y=j*dy+minY;
+             real=U[initIndex+j*nx*2+i*2+0]*coef2;
+             imag=U[initIndex+j*nx*2+i*2+1]*coef2;
+				 compVal=real+I*imag;
 
-      		       for(ii=0; ii<NX; ii++) {
-            		   X=ii*dX+minTX;
-		               for(jj=0; jj<NY; jj++) {
-      		           Y=jj*dY+minTY;
-							  phase=k0*0.5/L*((X-x)*(X-x)+(Y-y)*(Y-y))+k0*L;
-							  crossSum[ii][jj]+=compVal*cexp(-I*phase)/L*dx*dy;
-							}
-						 }
+             for(ii=0; ii<NX; ii++) {
+               X=ii*dX+minTX;
+               for(jj=0; jj<NY; jj++) {
+                 Y=jj*dY+minTY;
+					  phase=k0*0.5/(targetZ-z)*((X-x)*(X-x)+(Y-y)*(Y-y))+k0*(targetZ-z);
+					  crossSum[ii][jj]+=compVal*cexp(-I*phase)/(targetZ-z)*dx*dy;
+					}
+				 }
 
-			  		  }			  
-					}	// End of for(i)
+			  }
+			  
+			}	// End of for(i)
 		
-				   printf("sliceI/sliceN=%d/%d\n",sliceI,sliceN);
-				 }		// if(sliceI)
-			}
-       }		// End of for(sliceI)
+		   printf("sliceI/sliceN=%d/%d\n",sliceI,sliceN);
+		 }		// End of for(sliceI)
+
 	  }		// End of for(division)
 	  
 
@@ -145,8 +137,8 @@ void main(int argc, char *argv[])
        X=ii*dX+minTX;
        for(jj=0; jj<NY; jj++) {
          Y=jj*dY+minTY;
-			real=creal(crossSum[ii][jj]);
-			imag=cimag(crossSum[ii][jj]);
+			real=crossSum[ii][jj];
+			imag=crossSum[ii][jj];
 	      fprintf(crossOut,"%g %g %g\n",X,Y,(real*real+imag*imag)*stSlice);
        }
 	    fprintf(crossOut,"\n");
@@ -163,7 +155,6 @@ void main(int argc, char *argv[])
    free(subCnt);
    free(start);
 	free(harmony);
-	free(sliceList);
    for(i=0; i<NX; i++) free(crossSum[i]); free(crossSum);
 
 }

@@ -52,6 +52,7 @@ void loadBeam3D(Domain *D,LoadList *LL,int s,int iteration)
    
    numInBeamlet=LL->numInBeamlet;
    gamma0=LL->energy/mc2+1;
+   dGam=LL->spread*gamma0;
    emitX=LL->emitX/gamma0;
    emitY=LL->emitY/gamma0;
    gammaX=(1+LL->alphaX*LL->alphaX)/LL->betaX;
@@ -176,6 +177,9 @@ void loadBeam3D(Domain *D,LoadList *LL,int s,int iteration)
         r1=v1[0];           r2=v1[1];
         pr1=v1[2];          pr2=v1[3];
         th=v1[4];	          gam=v1[5];
+		  //th+=randomValue(1.0);
+		  //tmpInt=(int)th;
+		  //th-=tmpInt;
 
         if(LL->transFlat==OFF) {
           coef=sqrt(-2.0*log(r1));
@@ -204,7 +208,7 @@ void loadBeam3D(Domain *D,LoadList *LL,int s,int iteration)
         }
 
         tmp=sqrt(-2.0*log(gam))*cos(v1[6]*2*M_PI);
-		  gam=gamma0+dGam*tmp;
+		  gam=gamma0+dGam*tmp*ESn0;
 
 		  theta0=(th*0.999)*(dPhi-2*M_PI);
 

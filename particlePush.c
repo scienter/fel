@@ -909,7 +909,7 @@ void phaseShift(Domain *D,int iteration)
               p=D->particle[sliceI].head[s]->pt;
               while(p) {
 			       theta=p->theta;
-                p->theta=theta+shiftValue;
+                p->theta=theta-shiftValue;
 
 	             p=p->next;
               }

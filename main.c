@@ -15,6 +15,8 @@ int main(int argc, char *argv[])
     int progress,testProgress,maxProgress;
     double time_spent,dPhi,bucketZ,shiftZ;
     clock_t begin,end;
+	 struct tm *t_now;
+	 time_t timer;  //measure time
     char fileName[100],name[100];
     FILE *out;
     Domain D; 
@@ -35,6 +37,9 @@ int main(int argc, char *argv[])
       printf("mpirun -np N show [inputFile] [dumpNum]\n"); 
       exit(0); 
     }
+
+    timer=time(NULL);
+    t_now=localtime(&timer);
 
     //parameter setting
     parameterSetting(&D,argv[1]);
@@ -82,6 +87,13 @@ int main(int argc, char *argv[])
         if(iteration%D.saveStep==0 || iteration==D.maxStep-1) {
 	       if(D.particleSave==ON)  saveParticleHDF(&D,iteration); else ;
           if(D.fieldSave==ON)     saveFieldHDF(&D,iteration); else ;
+
+          end=clock();
+		    time_spent=(end-begin)/CLOCKS_PER_SEC/60.0;
+		    if(myrank==0) {
+		      printf("Time duration at %ddump:%.4gmin\n",iteration,time_spent);
+		    } else ;
+
         }      else ;
       }  else ;
 
@@ -154,13 +166,13 @@ int main(int argc, char *argv[])
 	      save_twiss(&D);
 //      else;
     } else ;
-    
-    //make 'report' file
-//    if(myrank==0) {
-//      sprintf(name,"report");
-//      out = fopen(name,"w");
-//      fclose(out);
-//    } else	;
+
+    end=clock();
+	 time_spent=(end-begin)/CLOCKS_PER_SEC/60.0;
+	 if(myrank==0) {
+	   //fprintf(out,"Time duration at %ddump:%.4gmin\n",iteration,time_spent);
+	   printf("Time duration at %ddump:%.4gmin\n",iteration,time_spent);
+    } else ;
 
     cleanMemory(&D);
 

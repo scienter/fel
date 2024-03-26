@@ -65,7 +65,7 @@ void main(int argc, char *argv[])
         crossSum[i]=(double *)malloc(ny*sizeof(double ));
 
       subCnt=(int *)malloc(division*sizeof(int ));
-      start=(int *)malloc(division*sizeof(int ));
+      start=(int *)malloc((division+1)*sizeof(int ));
       subP=sliceN/division;
       for(i=0; i<division-1; i++) subCnt[i]=subP;
       subCnt[division-1]=sliceN-subP*(division-1);
@@ -75,6 +75,7 @@ void main(int argc, char *argv[])
         start[n]=sum;
         sum+=subCnt[n];
       }
+		start[division]=sliceN;
 
       for(h=0; h<numHarmony; h++) {
         H=harmony[h];
@@ -92,6 +93,7 @@ void main(int argc, char *argv[])
         sprintf(dataName,"U%d",H);	
         for(n=0; n<division; n++) {
           N=nx*ny*2;
+
           U=(double *)malloc(N*subCnt[n]*sizeof(double ));  
 
           restore_Field_HDF(U,fileName,dataName,sliceN,subCnt[n],start[n],N);
@@ -99,7 +101,8 @@ void main(int argc, char *argv[])
           // save longitudinal profile
           cenI=nx/2; cenJ=ny/2;
           for(sliceI=0; sliceI<subCnt[n]; sliceI++) {
-            z=(sliceI+start[n])*bucketZ+step*dz+minZ;
+            //z=(sliceI+start[n])*bucketZ+step*dz+minZ;
+            z=(sliceI+start[n]-sliceN*0.5)*bucketZ;
             real=U[sliceI*N+cenJ*nx*2+cenI*2+0]*coef;
             imag=U[sliceI*N+cenJ*nx*2+cenI*2+1]*coef;
 

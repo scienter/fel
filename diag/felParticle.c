@@ -15,16 +15,16 @@ void main(int argc, char *argv[])
 {
    int initial,final,timeStep,division,skipCnt,step,i,j,sliceI,sliceN,s,totalCnt,n;
    int numData,nSpecies,subP,skip,*subCnt,*start;
-   int ii,jj,indexI,indexJ,numG;
+   int ii,jj,indexI,indexJ,numXY,numGam,idxGam;
    double theta,z,x,y,gamma,px,py,weight,index,core,range,curr,charge;
    double n0,dz,minZ,w,sum,dPhi,tmp,wx[2],wy[2],minX,minY,dx,dy,den;
-   double th,lambda0,bucketZ;
-   double *data,*denZ,*gam,**denXY;
+   double th,lambda0,bucketZ,minGam,rangeGam,dGam,gamRange,gamma0;
+   double *data,*denZ,*gam,**denXY,**denGam,*gam0List;
    char fileName[100],dataName[100],attrName[100],outFile[100],outDen[100];
    FILE *out,*out2;
 
-   if(argc<7) {
-      printf("felParticle division initial final step skipCnt rangeXY numXY\n");
+   if(argc<9) {
+      printf("felParticle division initial final step skipCnt rangeXY numXY gamRange numGam\n");
       exit(0);
    } else ;
 
@@ -34,21 +34,27 @@ void main(int argc, char *argv[])
    timeStep=atoi(argv[4]);
    skipCnt=atoi(argv[5]);
    range=atof(argv[6]);
-   numG=atoi(argv[7]);
+   numXY=atoi(argv[7]);
+   gamRange=atof(argv[8]);
+   numGam=atoi(argv[9]);
 
+   dGam=gamRange/(numGam*1.0);
    minX=minY=-0.5*range;
-   dx=dy=range/(numG*1.0);
-   denXY=(double **)malloc((numG+1)*sizeof(double *));
-   for(i=0; i<=numG; i++)
-     denXY[i]=(double *)malloc((numG+1)*sizeof(double ));
+   dx=dy=range/(numXY*1.0);
+   denXY=(double **)malloc((numXY+1)*sizeof(double *));
+   for(i=0; i<=numXY; i++)
+     denXY[i]=(double *)malloc((numXY+1)*sizeof(double ));
 
    for(step=initial; step<=final; step+=timeStep)
    {
       sprintf(fileName,"particle%d.h5",step);
-//      restoreIntMeta(fileName,"species",&nSpecies,1);
+      restoreIntMeta(fileName,"nSpecies",&nSpecies,1);
+      printf("nSpecies=%d\n",nSpecies);
+      gam0List=(double *)malloc(nSpecies*sizeof(double ));
       restoreIntMeta(fileName,"numData",&numData,1);
       restoreIntMeta(fileName,"sliceN",&sliceN,1);
       restoreDoubleMeta(fileName,"minZ",&minZ,1);
+      restoreDoubleMeta(fileName,"gamma0",gam0List,nSpecies);
       restoreDoubleMeta(fileName,"dz",&dz,1);
       restoreDoubleMeta(fileName,"lambda0",&lambda0,1);      
       restoreDoubleMeta(fileName,"dPhi",&dPhi,1);      
@@ -56,14 +62,23 @@ void main(int argc, char *argv[])
 
       denZ=(double *)malloc(sliceN*sizeof(double ));
       gam=(double *)malloc(sliceN*sizeof(double ));
-      for(i=0; i<sliceN; i++) { denZ[i]=0.0; gam[i]=0.0; }
+      denGam=(double **)malloc(sliceN*sizeof(double *));
+      for(i=0; i<sliceN; i++) { 
+        denZ[i]=0.0; gam[i]=0.0; 
+        denGam[i]=(double *)malloc(numGam*sizeof(double ));
+      }
 
-      nSpecies=1;
+      //nSpecies=1;
       for(s=0; s<nSpecies; s++) {
+        gamma0 = gam0List[s];
+	minGam = gamma0-gamRange*0.5;
 
-	for(i=0; i<=numG; i++)
-          for(j=0; j<=numG; j++)
+	for(i=0; i<=numXY; i++)
+          for(j=0; j<=numXY; j++)
 	    denXY[i][j]=0.0;
+        for(i=0; i<sliceN; i++)
+          for(j=0; j<numGam; j++)
+            denGam[i][j]=0.0;
 
 	sprintf(dataName,"%d",s);	
 	restore_attr_HDF(&totalCnt,fileName,dataName,"totalCnt");
@@ -119,12 +134,15 @@ void main(int argc, char *argv[])
 
 	    denZ[sliceI]+=weight;
 	    gam[sliceI]+=gamma*weight;
+            idxGam=(int)((gamma-minGam)/dGam);
+	    if (idxGam>=0 && idxGam<numGam-1)
+              denGam[sliceI][idxGam]+=1;
 
 	    // calculation for density at beam center
 	    if(sliceI==sliceN/2) {
               indexI=(int)((x-minX)/dx);
               indexJ=(int)((y-minY)/dy);
-  	      if(indexI>=0 && indexI<numG && indexJ>=0 && indexJ<numG) {
+  	      if(indexI>=0 && indexI<numXY && indexJ>=0 && indexJ<numXY) {
 	        wx[1]=(x-minX)/dx-indexI; wx[0]=1.0-wx[1];
 	        wy[1]=(y-minY)/dy-indexJ; wy[0]=1.0-wy[1];
 	        for(ii=0; ii<2; ii++)
@@ -151,9 +169,9 @@ void main(int argc, char *argv[])
 	sprintf(outDen,"%dDen%d",s,step);	
         out2=fopen(outDen,"w");
 	sum=0.0;
-        for(ii=0; ii<=numG; ii++) {
+        for(ii=0; ii<=numXY; ii++) {
 	  x=minX+ii*dx;
-          for(jj=0; jj<=numG; jj++) {
+          for(jj=0; jj<=numXY; jj++) {
 	    y=minY+jj*dy;
 	    den=denXY[ii][jj]/dx/dy/bucketZ;
 	    sum+=denXY[ii][jj]*1.602e-19;
@@ -164,6 +182,19 @@ void main(int argc, char *argv[])
        	fclose(out2);
 	curr=sum/bucketZ*3e8;
 	printf("%s is made. peakCurrent=%g\n",outDen,curr);
+
+        sprintf(outFile,"%dDensityGam%d",s,step);
+        out=fopen(outFile,"w");
+        for(i=0; i<sliceN; i++) {
+          for(j=0; j<numGam; j++) {
+            z=i*bucketZ+step*dz+minZ;
+            gamma = minGam + dGam*j;
+            fprintf(out,"%.10g %g %g\n",z,gamma,denGam[i][j]);
+          }
+          fprintf(out,"\n");
+        }
+        fclose(out);
+        printf("%s is made.\n",outFile);
 
 	
       }		//End of for(s)
@@ -184,9 +215,13 @@ void main(int argc, char *argv[])
 
       free(denZ);
       free(gam);
+      for(i=0; i<sliceN; i++) free(denGam[i]);
+      free(denGam);
+      free(gam0List);
+      
    }
 
-   for(i=0; i<=numG; i++) free(denXY[i]); free(denXY);
+   for(i=0; i<=numXY; i++) free(denXY[i]); free(denXY);
 
    printf("total charge = %g [pC]\n",charge*1.602e-7);
 

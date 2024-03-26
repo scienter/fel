@@ -24,8 +24,8 @@ void main(int argc, char *argv[])
    char fileName[100],dataName[100],attrName[100],outFile1[100],outFile[100];
    FILE *out,*out1;
 
-   if(argc<4) {
-      printf("phase1D division initial final step\n");
+   if(argc<5) {
+      printf("phase1D division initial final step sliceRange\n");
       exit(0);
    } else ;
 
@@ -37,7 +37,7 @@ void main(int argc, char *argv[])
 
 	sprintf(outFile1,"fieldPhase");	
 	out1=fopen(outFile1,"w");
-	fprintf(out1,"step phase amp real imag \n");
+	fprintf(out1,"step phase amp\n");
 	fclose(out1);
    for(step=initial; step<=final; step+=timeStep)
    {

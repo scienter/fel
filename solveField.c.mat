@@ -140,7 +140,7 @@ void solve_Field_U_3D(Domain *D,int iteration)
      alpha=-I*dz*0.25/(H*ks)/dx/dx;
   	  beta=-I*dz*0.25/(H*ks)/dy/dy;
 
-     diagB = -1*(1+2*beta)/beta;
+     diagB = (1-2*beta)/beta;
 	  rList[0]=1;
 	  rList[1]=-diagB;
      for(i=2; i<ny; i++)
@@ -158,7 +158,7 @@ void solve_Field_U_3D(Domain *D,int iteration)
 //       memcpy(&(D->tmpU[0]),&(D->U[h][sliceI][0]),nx*ny*sizeof(double complex ));
        i=0;
        for(j=0; j<ny; j++)
-         SList[j]=(-1*(1-2*alpha)*D->Uc[h][sliceI][j*nx+i]-alpha*D->Uc[h][sliceI][j*nx+(i+1)]+D->ScU[h][sliceI][j*nx+i]*currentFlag)/beta;
+         SList[j]=((1+2*alpha)*D->Uc[h][sliceI][j*nx+i]-alpha*D->Uc[h][sliceI][j*nx+(i+1)]+D->ScU[h][sliceI][j*nx+i]*currentFlag)/beta;
        for(j=0; j<ny; j++) {
 		   compVal=0+I*0;
          for(ii=0; ii<ny; ii++) 
@@ -167,7 +167,7 @@ void solve_Field_U_3D(Domain *D,int iteration)
 		 }		 
        for(i=1; i<nx-1; i++) {
          for(j=0; j<ny; j++)
-           SList[j]=(-1*(1-2*alpha)*D->Uc[h][sliceI][j*nx+i]-alpha*(D->Uc[h][sliceI][j*nx+(i-1)]+D->Uc[h][sliceI][j*nx+(i+1)])+D->ScU[h][sliceI][j*nx+i]*currentFlag)/beta;
+           SList[j]=((1+2*alpha)*D->Uc[h][sliceI][j*nx+i]-alpha*(D->Uc[h][sliceI][j*nx+(i-1)]+D->Uc[h][sliceI][j*nx+(i+1)])+D->ScU[h][sliceI][j*nx+i]*currentFlag)/beta;
          for(j=0; j<ny; j++) {
   	        compVal=0+I*0;
            for(ii=0; ii<ny; ii++) 
@@ -177,7 +177,7 @@ void solve_Field_U_3D(Domain *D,int iteration)
        }
        i=nx-1;
        for(j=0; j<ny; j++)
-         SList[j]=(-1*(1-2*alpha)*D->Uc[h][sliceI][j*nx+i]-alpha*D->Uc[h][sliceI][j*nx+(i-1)]+D->ScU[h][sliceI][j*nx+i]*currentFlag)/beta;
+         SList[j]=((1+2*alpha)*D->Uc[h][sliceI][j*nx+i]-alpha*D->Uc[h][sliceI][j*nx+(i-1)]+D->ScU[h][sliceI][j*nx+i]*currentFlag)/beta;
        for(j=0; j<ny; j++) {
   	      compVal=0+I*0;
          for(ii=0; ii<ny; ii++) 

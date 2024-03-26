@@ -46,10 +46,10 @@ void solveField(Domain D,int iteration)
 
 void solve_Field_U_3D(Domain *D,int iteration)
 {
-   int h,H,numHarmony,i,j,sliceI,startI,endI,ii;  
+   int h,H,numHarmony,i,j,sliceI,startI,endI;  
    int n,nx,ny;
    double ks,dx,dy,dz,currentFlag;
-   double complex alpha,beta,invR,diagB,compVal,*rList,**B,*SList;
+   double complex alpha,beta,later,*CC,*DD,*dd;
    int myrank, nTasks;
    MPI_Status status;
 
@@ -65,138 +65,15 @@ void solve_Field_U_3D(Domain *D,int iteration)
 	currentFlag=D->currentFlag;
 
    // first step
-   rList=(double complex *)malloc(nx*sizeof(double complex));
-   SList=(double complex *)malloc(nx*sizeof(double complex));
-   B=(double complex **)malloc(nx*sizeof(double complex *));
-   for(i=0; i<nx; i++)
-      B[i]=(double complex *)malloc(nx*sizeof(double complex));
+   CC=(double complex *)malloc(nx*sizeof(double complex));
+   DD=(double complex *)malloc(nx*sizeof(double complex));
+   dd=(double complex *)malloc(nx*sizeof(double complex));
 
    for(h=0; h<numHarmony; h++)  {
 	  H = D->harmony[h];
-     alpha=-I*dz*0.25/(H*ks)/dx/dx;
-  	  beta=-I*dz*0.25/(H*ks)/dy/dy;
-
-     diagB = (1-2*alpha)/alpha;
-	  rList[0]=1;
-	  rList[1]=-diagB;
-     for(i=2; i<nx; i++)
-	    rList[i] = -1*(diagB*rList[i-1]+rList[i-2]);
-     invR = 1.0/(diagB*rList[nx-1]+rList[nx-2]);
-
-     for(i=0; i<nx; i++)
-       for(j=i; j<nx; j++) {
-		   compVal = rList[i]*rList[nx-1-j];
-			B[i][j] = compVal*invR;
-			B[j][i] = compVal*invR;
-		 }
-	
-     for(sliceI=startI; sliceI<endI; sliceI++) {
-//       memcpy(&(D->tmpU[0]),&(D->U[h][sliceI][0]),nx*ny*sizeof(double complex ));
-       j=0;
-       for(i=0; i<nx; i++)
-         SList[i]=((1+2*beta)*D->U[h][sliceI][j*nx+i]-beta*D->U[h][sliceI][(j+1)*nx+i]+D->ScU[h][sliceI][j*nx+i]*currentFlag)/alpha;
-       for(i=0; i<nx; i++) {
-		   compVal=0+I*0;
-         for(ii=0; ii<nx; ii++) 
-			  compVal+=B[i][ii]*SList[ii];
-	      D->Uc[h][sliceI][j*nx+i]=compVal;
-		 }
-		 
-       for(j=1; j<ny-1; j++) {
-         for(i=0; i<nx; i++)
-           SList[i]=((1+2*beta)*D->U[h][sliceI][j*nx+i]-beta*(D->U[h][sliceI][(j-1)*nx+i]+D->U[h][sliceI][(j+1)*nx+i])+D->ScU[h][sliceI][j*nx+i]*currentFlag)/alpha;
-         for(i=0; i<nx; i++) {
-  	        compVal=0+I*0;
-           for(ii=0; ii<nx; ii++) 
-			    compVal+=B[i][ii]*SList[ii];
-	        D->Uc[h][sliceI][j*nx+i]=compVal;
-		   }
-       }
-       j=ny-1;
-       for(i=0; i<nx; i++)
-         SList[i]=((1+2*beta)*D->U[h][sliceI][j*nx+i]-beta*D->U[h][sliceI][(j-1)*nx+i]+D->ScU[h][sliceI][j*nx+i]*currentFlag)/alpha;
-       for(i=0; i<nx; i++) {
-  	      compVal=0+I*0;
-         for(ii=0; ii<nx; ii++) 
-		     compVal+=B[i][ii]*SList[ii];
-	      D->Uc[h][sliceI][j*nx+i]=compVal;
-		 }
-	  }
-   }
-   free(rList);
-   free(SList);
-   for(i=0; i<nx; i++) free(B[i]);
-	free(B);
-
-   // second step
-   rList=(double complex *)malloc(ny*sizeof(double complex));
-   SList=(double complex *)malloc(ny*sizeof(double complex));
-   B=(double complex **)malloc(ny*sizeof(double complex *));
-   for(i=0; i<ny; i++)
-      B[i]=(double complex *)malloc(ny*sizeof(double complex));
-
-   for(h=0; h<numHarmony; h++)  {
-	  H = D->harmony[h];
-     alpha=-I*dz*0.25/(H*ks)/dx/dx;
-  	  beta=-I*dz*0.25/(H*ks)/dy/dy;
-
-     diagB = -1*(1+2*beta)/beta;
-	  rList[0]=1;
-	  rList[1]=-diagB;
-     for(i=2; i<ny; i++)
-	    rList[i] = -1*(diagB*rList[i-1]+rList[i-2]);
-     invR = 1.0/(diagB*rList[ny-1]+rList[ny-2]);
-
-     for(i=0; i<ny; i++)
-       for(j=i; j<ny; j++) {
-		   compVal = rList[i]*rList[ny-1-j];
-			B[i][j] = compVal*invR;
-			B[j][i] = compVal*invR;
-		 }
-	
-     for(sliceI=startI; sliceI<endI; sliceI++) {
-//       memcpy(&(D->tmpU[0]),&(D->U[h][sliceI][0]),nx*ny*sizeof(double complex ));
-       i=0;
-       for(j=0; j<ny; j++)
-         SList[j]=(-1*(1-2*alpha)*D->Uc[h][sliceI][j*nx+i]-alpha*D->Uc[h][sliceI][j*nx+(i+1)]+D->ScU[h][sliceI][j*nx+i]*currentFlag)/beta;
-       for(j=0; j<ny; j++) {
-		   compVal=0+I*0;
-         for(ii=0; ii<ny; ii++) 
-			  compVal+=B[j][ii]*SList[ii];
-	      D->U[h][sliceI][j*nx+i]=compVal;
-		 }		 
-       for(i=1; i<nx-1; i++) {
-         for(j=0; j<ny; j++)
-           SList[j]=(-1*(1-2*alpha)*D->Uc[h][sliceI][j*nx+i]-alpha*(D->Uc[h][sliceI][j*nx+(i-1)]+D->Uc[h][sliceI][j*nx+(i+1)])+D->ScU[h][sliceI][j*nx+i]*currentFlag)/beta;
-         for(j=0; j<ny; j++) {
-  	        compVal=0+I*0;
-           for(ii=0; ii<ny; ii++) 
-			    compVal+=B[j][ii]*SList[ii];
-	        D->U[h][sliceI][j*nx+i]=compVal;
-		   }
-       }
-       i=nx-1;
-       for(j=0; j<ny; j++)
-         SList[j]=(-1*(1-2*alpha)*D->Uc[h][sliceI][j*nx+i]-alpha*D->Uc[h][sliceI][j*nx+(i-1)]+D->ScU[h][sliceI][j*nx+i]*currentFlag)/beta;
-       for(j=0; j<ny; j++) {
-  	      compVal=0+I*0;
-         for(ii=0; ii<ny; ii++) 
-		     compVal+=B[j][ii]*SList[ii];
-	      D->U[h][sliceI][j*nx+i]=compVal;
-		 }
-	  }
-   }
-
-   free(rList);
-   free(SList);
-   for(i=0; i<ny; i++) free(B[i]);
-	free(B);
-
-	
-}
-   /*
-   for(h=0; h<numHarmony; h++)  {
-	  H = D->harmony[h];
+     alpha=-I*dz*0.25/(ks)/dx/dx;
+     beta=-I*dz*0.25/(ks)/dy/dy;
+     CC[0]=alpha/(1.0-2*alpha);
      for(sliceI=startI; sliceI<endI; sliceI++) {
 //       memcpy(&(D->tmpU[0]),&(D->U[h][sliceI][0]),nx*ny*sizeof(double complex ));
        for(j=1; j<ny-1; j++) {
@@ -322,8 +199,8 @@ void solve_Field_U_3D(Domain *D,int iteration)
    free(CC); 
    free(DD);
    free(dd);
-   */
 
+}
 
 void solve_Sc_3D(Domain *D,int iteration)
 {

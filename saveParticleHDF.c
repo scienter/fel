@@ -15,7 +15,7 @@ void saveParticleHDF(Domain *D,int iteration)
     int i,s,minI,maxI,startI,endI,cnt,dataCnt=10;
     int start,index,totalCnt,cntList[D->nSpecies];
     char fileName[100],dataName[100],attrName[100];
-    double bucketZ,dPhi,*data;
+    double bucketZ,dPhi,*data,*gam0P;
     int **cntP;
     Particle *particle;
     particle=D->particle;
@@ -43,8 +43,10 @@ void saveParticleHDF(Domain *D,int iteration)
     ierr=H5Pclose(plist_id);
 
     cntP = (int **)malloc(D->nSpecies*sizeof(int *));
-    for(s=0; s<D->nSpecies; s++)
+    gam0P = (double *)malloc(D->nSpecies*sizeof(double ));
+    for(s=0; s<D->nSpecies; s++) {
       cntP[s] = (int *)malloc(nTasks*sizeof(int ));
+    }
 
     for(s=0; s<D->nSpecies; s++)
     {
@@ -138,6 +140,14 @@ void saveParticleHDF(Domain *D,int iteration)
     bucketZ=D->lambda0*D->numSlice;
     dPhi=2*M_PI*D->numSlice;
 
+    LL=D->loadList;
+    s=0;
+    while(LL->next) {
+      gam0P[s]=LL->energy/mc2 +1;
+      LL=LL->next;
+      s++;
+    }
+
     if(myrank==0) {
       for(s=0; s<D->nSpecies; s++) {
         sprintf(dataName,"%d",s);
@@ -149,11 +159,14 @@ void saveParticleHDF(Domain *D,int iteration)
       saveDoubleMeta(fileName,"bucketZ",&bucketZ,1);
       saveDoubleMeta(fileName,"dPhi",&dPhi,1);
       saveDoubleMeta(fileName,"lambda0",&D->lambda0,1);
+      saveDoubleMeta(fileName,"gamma0",gam0P,D->nSpecies);
       saveIntMeta(fileName,"numData",&dataCnt,1);
+      saveIntMeta(fileName,"nSpecies",&D->nSpecies,1);
       saveIntMeta(fileName,"sliceN",&D->sliceN,1);
     } else ;
 
     for(s=0; s<D->nSpecies; s++) free(cntP[s]); free(cntP);
+    free(gam0P);
 
     if(myrank==0) printf("%s is made.\n",fileName); else ;
 }

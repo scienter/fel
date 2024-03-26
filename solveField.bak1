@@ -98,7 +98,7 @@ void solve_Field_U_3D(Domain *D,int iteration)
        for(i=0; i<nx; i++) {
 		   compVal=0+I*0;
          for(ii=0; ii<nx; ii++) 
-			  compVal+=B[i][ii]*SList[ii];
+			  compVal+=B[i][j]*SList[ii];
 	      D->Uc[h][sliceI][j*nx+i]=compVal;
 		 }
 		 
@@ -108,7 +108,7 @@ void solve_Field_U_3D(Domain *D,int iteration)
          for(i=0; i<nx; i++) {
   	        compVal=0+I*0;
            for(ii=0; ii<nx; ii++) 
-			    compVal+=B[i][ii]*SList[ii];
+			    compVal+=B[i][j]*SList[ii];
 	        D->Uc[h][sliceI][j*nx+i]=compVal;
 		   }
        }
@@ -118,7 +118,7 @@ void solve_Field_U_3D(Domain *D,int iteration)
        for(i=0; i<nx; i++) {
   	      compVal=0+I*0;
          for(ii=0; ii<nx; ii++) 
-		     compVal+=B[i][ii]*SList[ii];
+		     compVal+=B[i][j]*SList[ii];
 	      D->Uc[h][sliceI][j*nx+i]=compVal;
 		 }
 	  }
@@ -158,30 +158,30 @@ void solve_Field_U_3D(Domain *D,int iteration)
 //       memcpy(&(D->tmpU[0]),&(D->U[h][sliceI][0]),nx*ny*sizeof(double complex ));
        i=0;
        for(j=0; j<ny; j++)
-         SList[j]=(-1*(1-2*alpha)*D->Uc[h][sliceI][j*nx+i]-alpha*D->Uc[h][sliceI][j*nx+(i+1)]+D->ScU[h][sliceI][j*nx+i]*currentFlag)/beta;
+         SList[j]=((1+2*alpha)*D->Uc[h][sliceI][j*nx+i]-alpha*D->Uc[h][sliceI][j*nx+(i+1)]+D->ScU[h][sliceI][j*nx+i]*currentFlag)/beta;
        for(j=0; j<ny; j++) {
 		   compVal=0+I*0;
          for(ii=0; ii<ny; ii++) 
-			  compVal+=B[j][ii]*SList[ii];
+			  compVal+=B[i][j]*SList[ii];
 	      D->U[h][sliceI][j*nx+i]=compVal;
 		 }		 
        for(i=1; i<nx-1; i++) {
          for(j=0; j<ny; j++)
-           SList[j]=(-1*(1-2*alpha)*D->Uc[h][sliceI][j*nx+i]-alpha*(D->Uc[h][sliceI][j*nx+(i-1)]+D->Uc[h][sliceI][j*nx+(i+1)])+D->ScU[h][sliceI][j*nx+i]*currentFlag)/beta;
+           SList[j]=((1+2*alpha)*D->Uc[h][sliceI][j*nx+i]-alpha*(D->Uc[h][sliceI][j*nx+(i-1)]+D->Uc[h][sliceI][j*nx+(i+1)])+D->ScU[h][sliceI][j*nx+i]*currentFlag)/beta;
          for(j=0; j<ny; j++) {
   	        compVal=0+I*0;
            for(ii=0; ii<ny; ii++) 
-			    compVal+=B[j][ii]*SList[ii];
+			    compVal+=B[i][j]*SList[ii];
 	        D->U[h][sliceI][j*nx+i]=compVal;
 		   }
        }
        i=nx-1;
        for(j=0; j<ny; j++)
-         SList[j]=(-1*(1-2*alpha)*D->Uc[h][sliceI][j*nx+i]-alpha*D->Uc[h][sliceI][j*nx+(i-1)]+D->ScU[h][sliceI][j*nx+i]*currentFlag)/beta;
+         SList[j]=((1+2*alpha)*D->Uc[h][sliceI][j*nx+i]-alpha*D->Uc[h][sliceI][j*nx+(i-1)]+D->ScU[h][sliceI][j*nx+i]*currentFlag)/beta;
        for(j=0; j<ny; j++) {
   	      compVal=0+I*0;
          for(ii=0; ii<ny; ii++) 
-		     compVal+=B[j][ii]*SList[ii];
+		     compVal+=B[i][j]*SList[ii];
 	      D->U[h][sliceI][j*nx+i]=compVal;
 		 }
 	  }
