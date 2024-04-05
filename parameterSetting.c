@@ -535,6 +535,8 @@ int findBeamLoadParameters(int rank,LoadList *LL,Domain *D,char *input)
 
    if(LL->type>0)
    {
+     if(FindParameters("EBeam",1,"random_seed_ONOFF",input,str)) LL->randONOFF=whatONOFF(str);
+	  else LL->randONOFF=OFF;
      if(FindParameters("EBeam",1,"noise_ONOFF",input,str)) LL->noiseONOFF=whatONOFF(str);
      else  { printf("In [EBeam], noise_ONOFF=? [ON or OFF].\n"); fail=1;  }
      if(FindParameters("EBeam",1,"beam_energy",input,str)) LL->energy=atof(str);

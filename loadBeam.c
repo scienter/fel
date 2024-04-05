@@ -36,12 +36,14 @@ void loadBeam(Domain D,LoadList *LL,int s,int iteration)
 void loadBeam3D(Domain *D,LoadList *LL,int s,int iteration)
 {
    int l,b,n,m,numInBeamlet,beamlets,noiseONOFF,flag1,flag2;
-   int i,startI,endI,minI,maxI,ii,index;
+   int i,startI,endI,minI,maxI,ii,index,tmpInt;
    double posZ,current,n0,En0,EmitN0,ESn0,bucketZ,dPhi,div,ptclCnt,phase;
-   double macro,remacro,theta,theta0,dGam,gam,gamma0,Ns,noise;
+   double macro,remacro,theta,theta0,dGam,gam,gamma0,Ns,noise,randTh;
    double sigX,sigY,emitX,emitY,gammaX,gammaY,x,y,pz,px,py,vz;
    double sigXPrime,sigYPrime,xPrime,yPrime,delTX,delTY,distanceX,distanceY;
    double y1,y2,coef,tmp,sum,eNumbers,randPhase,an,bn,sigma,sqrt2,r,r1,r2,pr1,pr2,th;
+	double L,gl,g,lquad,beta0,min_beta,max_beta;
+   QuadList *QD;
    int myrank;
    ptclList *New;
    MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
@@ -53,29 +55,25 @@ void loadBeam3D(Domain *D,LoadList *LL,int s,int iteration)
    numInBeamlet=LL->numInBeamlet;
    gamma0=LL->energy/mc2+1;
    dGam=LL->spread*gamma0;
-   emitX=LL->emitX/gamma0;
-   emitY=LL->emitY/gamma0;
-   gammaX=(1+LL->alphaX*LL->alphaX)/LL->betaX;
-   gammaY=(1+LL->alphaY*LL->alphaY)/LL->betaY;   
-   sigX=sqrt(emitX/gammaX);
-   sigY=sqrt(emitY/gammaY);
-   sigXPrime=sqrt(emitX*gammaX);
-   sigYPrime=sqrt(emitY*gammaY);
-
-   distanceX=sqrt((LL->betaX-1.0/gammaX)/gammaX);
-   distanceY=sqrt((LL->betaY-1.0/gammaY)/gammaY);
-   vz=sqrt(gamma0*gamma0-1.0)/gamma0;	//normalized
-   if(vz==0.0) { delTX=delTY=0.0; }
-   else  {
-     delTX=distanceX/vz;	//normalized
-     delTY=distanceY/vz;	//normalized
-   }
-
-   if(myrank==0) printf("delTX=%g, delTY=%g, betaX=%g, betaY=%g\n",delTX,delTY,LL->betaX,LL->betaY); else ;
-
    current=LL->peakCurrent;		// peak current in a cell
    bucketZ=D->lambda0*D->numSlice;	// size of a big slice
    ptclCnt=numInBeamlet*LL->numBeamlet;	
+
+   // Calculation recommanding quad g*l, beta_min, beta_max
+	QD=D->qdList;
+	if (QD->next) {
+	  beta0=0.5*(LL->betaX+LL->betaY);
+	  L = 0.5*(QD->unitEnd[0]-QD->unitStart[0]);
+	  lquad = QD->qdEnd[0]-QD->qdStart[0];
+	  gl=2*gamma0*eMass*velocityC/eCharge/beta0*sqrt(2.0/(1+sqrt(1+4*L*L/beta0/beta0)));
+	  g = gl/lquad;
+	  tmp = 2*gamma0*eMass*velocityC/(eCharge*gl);
+     min_beta = tmp*(tmp/L-1)/sqrt(tmp*tmp/L/L-1);
+     max_beta = tmp*(tmp/L+1)/sqrt(tmp*tmp/L/L-1);
+	  if (myrank==0) printf("Recommandations : quad g=%g, cen_beta=%g, min_beta=%g, max_beta=%g\n",g,beta0,min_beta,max_beta);
+	}
+
+
 
    dPhi=2.0*M_PI*D->numSlice;
    div=2.0*M_PI/(1.0*numInBeamlet);
@@ -87,8 +85,9 @@ void loadBeam3D(Domain *D,LoadList *LL,int s,int iteration)
    LL->totalCnt=LL->numBeamlet*LL->numInBeamlet;
 
    //position define   
-//   srand((unsigned int)time(NULL));
-   srand(myrank);
+   if (LL->randONOFF==OFF) { srand(myrank); randTh=0; }
+	else { srand(time(NULL)); randTh=randomValue(1.0); }
+
 
 //   gsl_qrng *q2=gsl_qrng_alloc(gsl_qrng_niederreiter_2,1);
 //   gsl_qrng *q1=gsl_qrng_alloc(gsl_qrng_sobol,4);
@@ -152,8 +151,8 @@ void loadBeam3D(Domain *D,LoadList *LL,int s,int iteration)
      sigXPrime=sqrt(emitX*gammaX);
      sigYPrime=sqrt(emitY*gammaY);
 
-     distanceX=sqrt((LL->betaX-1.0/gammaX)/gammaX);
-     distanceY=sqrt((LL->betaY-1.0/gammaY)/gammaY);
+     distanceX=sqrt(fabs((LL->betaX-1.0/gammaX)/gammaX));
+     distanceY=sqrt(fabs((LL->betaY-1.0/gammaY)/gammaY));
      vz=sqrt(gamma0*gamma0-1.0)/gamma0;	//normalized
      if(vz==0.0) { delTX=delTY=0.0; }
      else  {
@@ -177,9 +176,9 @@ void loadBeam3D(Domain *D,LoadList *LL,int s,int iteration)
         r1=v1[0];           r2=v1[1];
         pr1=v1[2];          pr2=v1[3];
         th=v1[4];	          gam=v1[5];
-		  //th+=randomValue(1.0);
-		  //tmpInt=(int)th;
-		  //th-=tmpInt;
+	     th+=randTh;
+		  tmpInt=(int)th;
+		  th-=tmpInt;
 
         if(LL->transFlat==OFF) {
           coef=sqrt(-2.0*log(r1));

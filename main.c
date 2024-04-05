@@ -55,6 +55,7 @@ int main(int argc, char *argv[])
 
     if(myrank==0) testK_quadG(&D); else ;
     MPI_Barrier(MPI_COMM_WORLD);
+//printf("myrank=%d,iteration=%d, testK_quadG is done\n",myrank,iteration);
 
     //loading  beam
     iteration=0;
@@ -65,6 +66,7 @@ int main(int argc, char *argv[])
       LL=LL->next;
       s++;
     }
+//printf("myrank=%d,iteration=%d, beamLoading is done\n",myrank,iteration);
 
     // setting the wake_function
     wakeFunction(&D,iteration);

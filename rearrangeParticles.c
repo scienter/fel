@@ -92,12 +92,12 @@ void periodicParticles(Domain *D,int iteration)
 //          if(intThe>=1) { printf("In rearrange, intThe=%d,theta=%g,iteration=%d,dPhi=%g\n",intThe,theta,iteration,dPhi); }
           if(theta>=dPhi)  {
             intThe=(int)(theta/dPhi);
-//	         theta-=dPhi*intThe;
-	         theta-=dPhi;
+	         theta-=dPhi*intThe;
+//	         theta-=dPhi;
           } else if(theta<0) {              
             intThe=(int)(theta/dPhi);
-//	         theta-=dPhi*(intThe-1);
-	         theta+=dPhi;
+	         theta-=dPhi*(intThe-1);
+//	         theta+=dPhi;
           } else ;
 
           if(theta>=dPhi || theta<0) { printf("In rearrange, theta=%g,iteration=%d,dPhi=%g\n",theta,iteration,dPhi);  }

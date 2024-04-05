@@ -30,7 +30,7 @@ typedef struct _LoadList  {
    int numBeamlet;	// Number of beamlets in one big slice.
    int totalCnt,subCnt,subCntRef,minN,maxN;
 	int transFlat;
-   int noiseONOFF;
+   int noiseONOFF,randONOFF;
    double aveGam;
 
    struct _LoadList *next;
