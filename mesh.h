@@ -194,7 +194,7 @@ void saveIntMeta(char *fileName,char *dataName,int *data,int dataCnt);
 void saveDoubleMeta(char *fileName,char *dataName,double *data,int dataCnt);
 void rearrangeParticles(Domain *D,int iteration);
 void updateTotalEnergy(Domain *D,int iteration);
-void saveTotalEnergy(Domain *D);
+void saveTotalEnergy(Domain *D,int iteration);
 void wakeFunction(Domain *D,int iteration);
 void updateWakeField(Domain *D,int iteration);
 void periodicParticles(Domain *D,int iteration);
