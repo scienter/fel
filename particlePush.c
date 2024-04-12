@@ -504,11 +504,11 @@ void push_theta_gamma_1D(Domain *D,int iteration)
             tmp=creal(Em[ll]*cexp(I*(ll+1)*theta));
             sumEzPart += 2.0*tmp;
           }
-          k1=dz*(ku-ks*(1.0+K*K+sumTh)*0.5*invGam*invGam)*invBeta;
-          l1=dz*(ks*sumGam/2.0*invGam*invBeta + e_mc2*sumEzPart);
+          k1=(ku-ks*(1.0+K*K+sumTh)*0.5*invGam*invGam)*invBeta;
+          l1=(ks*sumGam/2.0*invGam*invBeta + e_mc2*sumEzPart);
 			 
-	       theta=p->theta+0.5*k1;
-          gamma=p->gamma+0.5*l1; invGam=1.0/gamma;
+	       theta=p->theta+0.5*dz*k1;
+          gamma=p->gamma+0.5*dz*l1; invGam=1.0/gamma;
           invBeta = 1.0-(1.0 + K*K)*0.5*invGam*invGam;
           invBeta = 1.0/invBeta;
           sumTh=sumGam=0.0;
@@ -536,11 +536,11 @@ void push_theta_gamma_1D(Domain *D,int iteration)
             tmp=creal(Em[ll]*cexp(I*(ll+1)*theta));
             sumEzPart += 2.0*tmp;
           }
-          k2=dz*(ku-ks*(1.0+K*K+sumTh)*0.5*invGam*invGam)*invBeta;
-          l2=dz*(ks*sumGam/2.0*invGam*invBeta + e_mc2*sumEzPart);
+          k2=(ku-ks*(1.0+K*K+sumTh)*0.5*invGam*invGam)*invBeta;
+          l2=(ks*sumGam/2.0*invGam*invBeta + e_mc2*sumEzPart);
 
-	       theta=p->theta+0.5*k2;
-          gamma=p->gamma+0.5*l2; invGam=1.0/gamma;
+	       theta=p->theta+0.5*dz*k2;
+          gamma=p->gamma+0.5*dz*l2; invGam=1.0/gamma;
           invBeta = 1.0-(1.0 + K*K)*0.5*invGam*invGam;
           invBeta = 1.0/invBeta;
           sumTh=sumGam=0.0;
@@ -568,11 +568,11 @@ void push_theta_gamma_1D(Domain *D,int iteration)
             tmp=creal(Em[ll]*cexp(I*(ll+1)*theta));
             sumEzPart += 2.0*tmp;
           }
-          k3=dz*(ku-ks*(1.0+K*K+sumTh)*0.5*invGam*invGam)*invBeta;
-          l3=dz*(ks*sumGam/2.0*invGam*invBeta + e_mc2*sumEzPart);
+          k3=(ku-ks*(1.0+K*K+sumTh)*0.5*invGam*invGam)*invBeta;
+          l3=(ks*sumGam/2.0*invGam*invBeta + e_mc2*sumEzPart);
 
-	       theta=p->theta+k3;
-          gamma=p->gamma+l3; invGam=1.0/gamma;
+	       theta=p->theta+dz*k3;
+          gamma=p->gamma+dz*l3; invGam=1.0/gamma;
           invBeta = 1.0-(1.0 + K*K)*0.5*invGam*invGam;
           invBeta = 1.0/invBeta;
           sumTh=sumGam=0.0;
@@ -600,14 +600,14 @@ void push_theta_gamma_1D(Domain *D,int iteration)
             tmp=creal(Em[ll]*cexp(I*(ll+1)*theta));
             sumEzPart += 2.0*tmp;
           }
-          k4=dz*(ku-ks*(1.0+K*K+sumTh)*0.5*invGam*invGam)*invBeta;
-          l4=dz*(ks*sumGam/2.0*invGam*invBeta + e_mc2*sumEzPart);
+          k4=(ku-ks*(1.0+K*K+sumTh)*0.5*invGam*invGam)*invBeta;
+          l4=(ks*sumGam/2.0*invGam*invBeta + e_mc2*sumEzPart);
 
-          tmp=1.0/6.0*(k1+2*k2+2*k3+k4);
+          tmp=dz/6.0*(k1+2*k2+2*k3+k4);
 	       if(tmp>dPhi || tmp<-dPhi) 
             printf("iteration=%d, dTheta=%g, sumEzPart=%g\n",iteration,tmp,sumEzPart);
           p->theta+=tmp;
-          p->gamma+=1.0/6.0*(l1+2*l2+2*l3+l4);
+          p->gamma+=dz/6.0*(l1+2*l2+2*l3+l4);
 
 	       p=p->next;
         }

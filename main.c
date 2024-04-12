@@ -43,7 +43,6 @@ int main(int argc, char *argv[])
 
     //parameter setting
     parameterSetting(&D,argv[1]);
-    if (myrank==0) fopen("totalEnergy","w"); else;
 //printf("myrank=%d,iteration=%d, parameterSetting is done\n",myrank,iteration);
 
     //create mesh
@@ -82,8 +81,6 @@ int main(int argc, char *argv[])
 
       // update total energy
       updateTotalEnergy(&D,iteration);
-      saveTotalEnergy(&D,iteration);
-      MPI_Barrier(MPI_COMM_WORLD);
 //printf("myrank=%d,iteration=%d, updateTotalEnergy is done\n",myrank,iteration);
 
 
@@ -114,6 +111,12 @@ int main(int argc, char *argv[])
        	rearrangeChicaneParticle(&D);
        	shiftChicaneField(&D);
 			if(myrank==0) printf("Chicane is performed. at step=%d\n",iteration); else ;
+         if(D.chi_SSON==ON) { 
+			  selfSeed_Field(&D);
+			  if(myrank==0) printf("self-seeding is performed. at step=%d\n",iteration); 
+			  else ;
+			} else ;
+
       } else {
 			
 			set_chicane_zero(&D);		
@@ -165,6 +168,7 @@ int main(int argc, char *argv[])
     }		//End of for(iteration<maxStep)
 
     // save total energy for all steps
+    saveTotalEnergy(&D);
     if(myrank==0) {
 //      if(D.mode==Static || D.mode==Twiss) 
 	      save_twiss(&D);

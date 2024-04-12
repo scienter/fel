@@ -83,9 +83,12 @@ typedef struct _Domain
 
    //Chicane
    int nChi,chicaneFlag,calChicaneFlag,shiftSlice;
-   double dipoleB,ld,L1,L2;
+   double dipoleB,ld,L1,L2,chicaneDelay,chi_delay;
    struct _ChiList *chiList;
 
+   //SelfSeed
+	int chi_SSON;
+	double chi_d,bragTh,extincL,chi0;
    
    //Seed
    double P0,duration,spotSigR,a0,zR,focus;
@@ -151,7 +154,11 @@ typedef struct _PhaseShifter  {
 
 typedef struct _ChiList  {
    int chiON;
-   double chiStart,chiEnd,ld,L1,L2,B0;
+   double chiStart,chiEnd,ld,L1,L2,B0,delay;
+
+   //self seeding
+   int selfSeedON;
+	double d, bragTh, extincL, chi0;
 
    struct _ChiList *next;
 } ChiList;
@@ -194,7 +201,7 @@ void saveIntMeta(char *fileName,char *dataName,int *data,int dataCnt);
 void saveDoubleMeta(char *fileName,char *dataName,double *data,int dataCnt);
 void rearrangeParticles(Domain *D,int iteration);
 void updateTotalEnergy(Domain *D,int iteration);
-void saveTotalEnergy(Domain *D,int iteration);
+void saveTotalEnergy(Domain *D);
 void wakeFunction(Domain *D,int iteration);
 void updateWakeField(Domain *D,int iteration);
 void periodicParticles(Domain *D,int iteration);
@@ -203,3 +210,4 @@ void set_chicane_zero(Domain *D);
 void calParticleDelay(Domain *D);
 void rearrangeChicaneParticle(Domain *D);
 void shiftChicaneField(Domain *D);
+void selfSeed_Field(Domain *D);

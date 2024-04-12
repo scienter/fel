@@ -355,7 +355,7 @@ int findPhaseShifters(int rank,PhaseShifter *PS,Domain *D,char *input)
      
 int findChiLoadParameters(int rank, ChiList *Chi,Domain *D,char *input)
 {
-	double z0,delayT,vz,tmp1,tmp2;
+	double z0,vz,tmp1,tmp2,d;
    char name[100], str[100];
    int i,fail=0;
    int myrank, nTasks;
@@ -368,7 +368,7 @@ int findChiLoadParameters(int rank, ChiList *Chi,Domain *D,char *input)
 	else Chi->chiON=OFF;
 
    if(Chi->chiON>0) {
-     if(FindParameters("Chicane",rank,"delay_time",input,str)) delayT=atof(str)*1e-15;
+     if(FindParameters("Chicane",rank,"delay_time",input,str)) Chi->delay=atof(str)*1e-15;
      else  { printf("In [Chicane], delay_time=? [fs]\n");  fail=1; }
      if(FindParameters("Chicane",rank,"position_z",input,str)) z0=atof(str);
      else  { printf("In [Chicane], position_z\n");  fail=1; }
@@ -383,7 +383,7 @@ int findChiLoadParameters(int rank, ChiList *Chi,Domain *D,char *input)
      Chi->chiEnd=z0+(Chi->L1+0.5*Chi->L2)+0.5*Chi->ld+D->dz;
 
      vz=velocityC*sqrt(1.0-1.0/D->gamma0/D->gamma0);
-     tmp1=delayT*vz-(Chi->L2-Chi->ld)*0.5/D->gamma0/D->gamma0;
+     tmp1=Chi->delay*vz-(Chi->L2-Chi->ld)*0.5/D->gamma0/D->gamma0;
 	  tmp2=tmp1/(Chi->L1-1.0/3.0*Chi->ld);
 	  if(tmp2>0.0) 
 	     Chi->B0=D->gamma0*eMass*vz/eCharge/Chi->ld*sqrt(tmp2);
@@ -391,10 +391,24 @@ int findChiLoadParameters(int rank, ChiList *Chi,Domain *D,char *input)
 	     Chi->B0=0.0;
 		  Chi->chiON=OFF;
 	  }
-
-     if(fail==1)  exit(0); else ;
-	} else ;
-
+   
+     if(FindParameters("Chicane",rank,"selfseed_ONOFF",input,str)) Chi->selfSeedON=whatONOFF(str);
+	  else Chi->selfSeedON=OFF;
+	  if(Chi->selfSeedON==ON) {
+       if(FindParameters("Chicane",rank,"crystal_thickness",input,str)) Chi->d=atof(str)*1e-6;
+       else  { printf("In [Chicane], crystal_thickness=? [um]\n");  fail=1; }
+       if(FindParameters("Chicane",rank,"grating_const",input,str)) d=atof(str)*1e-9;
+       else  { printf("In [Chicane], grating_const=? [nm]\n");  fail=1; }
+       if(FindParameters("Chicane",rank,"extinction_length",input,str)) Chi->extincL=atof(str)*1e-6;
+       else  { printf("In [Chicane], extinction_length=? [um]\n");  fail=1; }
+       if(FindParameters("Chicane",rank,"chi0",input,str)) Chi->chi0=atof(str);
+       else  { printf("In [Chicane], chi0=? \n");  fail=1; }
+		 Chi->bragTh=asin(M_PI/(d*D->ks));
+		 if(myrank==0) printf("bragTh=%g\n",Chi->bragTh*180/M_PI);
+	  } else ;
+   }
+   if(fail==1)  exit(0); else ;
+	
 	return Chi->chiON;
 }
 

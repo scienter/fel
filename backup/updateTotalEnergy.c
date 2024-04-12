@@ -29,7 +29,7 @@ void updateTotalEnergy(Domain *D,int iteration)
 
 }
 
-void saveTotalEnergy(Domain *D)
+void saveTotalEnergy(Domain *D,int iteration)
 {
    int maxStep,i,h,N,numHarmony,startI,endI,step,start;
    double *recvData,*sendData,z,dz,minZ;
@@ -60,44 +60,46 @@ void saveTotalEnergy(Domain *D)
      coef2=coef*coef/Z0*D->dx*D->dy;
    if(D->mode==Time_Dependent) coef2*=dt; else ;
 
-   sendData=(double *)malloc(maxStep*numHarmony*sizeof(double ));
-	start=0;
-   for(step=0; step<maxStep; step++) {
-     for(h=0; h<numHarmony; h++) 
-       sendData[start+h] = D->totalEnergy[step][h];
-     start += numHarmony;   
-   }
+   sendData=(double *)malloc(numHarmony*sizeof(double ));
+   for(h=0; h<numHarmony; h++) 
+     sendData[h] = D->totalEnergy[iteration][h];
 
-   recvData=(double *)malloc(maxStep*numHarmony*sizeof(double ));
+   recvData=(double *)malloc(numHarmony*sizeof(double ));
    for(i=1; i<nTasks; i++) {
      if(myrank==i)  {
-       MPI_Send(sendData,maxStep*numHarmony,MPI_DOUBLE,0,myrank,MPI_COMM_WORLD);
+       MPI_Send(sendData,numHarmony,MPI_DOUBLE,0,myrank,MPI_COMM_WORLD);
      }  else ;
    }
 
    if(myrank==0) {
      for(i=1; i<nTasks; i++) {
-       MPI_Recv(recvData,maxStep*numHarmony,MPI_DOUBLE,i,i,MPI_COMM_WORLD,&status);
-		 start=0;
-       for(step=0; step<maxStep; step++) {
-         for(h=0; h<numHarmony; h++) 
-	        D->totalEnergy[step][h] += recvData[start+h];
-         start += numHarmony;   
-       }
+       MPI_Recv(recvData,numHarmony,MPI_DOUBLE,i,i,MPI_COMM_WORLD,&status);
+       for(h=0; h<numHarmony; h++) 
+	      D->totalEnergy[iteration][h] += recvData[h];
      }
 
-     out=fopen("totalEnergy","w");
-     for(step=0; step<maxStep; step++) {
-       z=step*dz+minZ;
-       fprintf(out,"%.15g",z);
-       for(h=0; h<numHarmony; h++) {
-         fprintf(out," %g",D->totalEnergy[step][h]*coef2);
+     out=fopen("totalEnergy","a");
+     z=iteration*dz+minZ;
+     fprintf(out,"%.15g",z);
+     for(h=0; h<numHarmony; h++) {
+       fprintf(out," %g",D->totalEnergy[iteration][h]*coef2);
 //			printf("step=%d, totalEnergy=%g\n",step,D->totalEnergy[step][h]*coef2);
-       }
-       fprintf(out,"\n");
      }
+     fprintf(out,"\n");
      fclose(out);
-     printf("totalEnergy is made.\n");
+     //printf("totalEnergy is made.\n");
+
+     //out=fopen("totalEnergy","w");
+     //for(step=0; step<maxStep; step++) {
+     //  z=step*dz+minZ;
+     //  fprintf(out,"%.15g",z);
+     //  for(h=0; h<numHarmony; h++) {
+     //    fprintf(out," %g",D->totalEnergy[step][h]*coef2);
+     //  }
+     //  fprintf(out,"\n");
+     //}
+     //fclose(out);
+     //printf("totalEnergy is made.\n");
    } else ;
 
    free(sendData);

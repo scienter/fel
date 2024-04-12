@@ -1,7 +1,7 @@
 EXEC = show
 CC = /opt/ompi/3.1.6/bin/mpicc
 #CC = h5pcc
-OBJS = main.o parameterSetting.o findparam.o boundary.o clean.o testK_quadG.o loadBeam.o saveParticleHDF.o saveFieldHDF.o updateK_quadG.o particlePush.o solveField.o rearrangeParticles.o fieldShareZ.o updateTotalEnergy.o loadSeed.o twiss.o shiftField.o wakeField.o chicane.o
+OBJS = main.o parameterSetting.o findparam.o boundary.o clean.o testK_quadG.o loadBeam.o saveParticleHDF.o saveFieldHDF.o updateK_quadG.o particlePush.o solveField.o rearrangeParticles.o fieldShareZ.o updateTotalEnergy.o loadSeed.o twiss.o shiftField.o wakeField.o chicane.o selfseed.o
 
 #-------- for Beam server ----------# 
 CFLAGS = -I/opt/gsl/2.6/include -I/opt/hdf5/1.10.3/include 
