@@ -5,12 +5,12 @@
 #include "mesh.h"
 #include "constants.h"
 
-void calParticleDelay(Domain *D)
+void calParticleDelay(Domain *D,int iteration)
 {
 	double B0,ld,L1,L2,vz,gamma0,ldbyR,th0,numSlice;
 	double dz1,dz2,dz3,shiftZ0,dXi,dPhi;
 	int sliceI,startI,endI,s,nSpecies,subSliceN;
-	double gamma,invGam,shiftZ;
+	double gamma,invGam,shiftZ,tmp;
    ptclList *p;
 
 	B0=D->dipoleB;
@@ -49,8 +49,14 @@ void calParticleDelay(Domain *D)
          dz2=(L1-ld)*(1.0/cos(th0)-1.0);
          dz3=(L2-ld)*(1.0-vz/velocityC);
          shiftZ=(4.0*dz1+2.0*dz2+dz3)/dXi;
-	      
+	
+         tmp=(shiftZ0-shiftZ)*dPhi;
+         if(isnan(tmp)) {
+            printf("iteration=%d,i=%d,tmp=%g,dz1=%g,gamma=%g,vz=%g,B0=%g,th0=%g,ld=%g\n",iteration,sliceI,tmp,dz1,p->gamma,vz,B0,th0,ld);
+            exit(0);  //lala
+         }
          p->theta+=(shiftZ0-shiftZ)*dPhi;
+         
 
 			if(fabs(shiftZ-shiftZ0)>=subSliceN) {
 				printf("shiftSlice=%g, subSliceN=%d it is too much.\n",shiftZ-shiftZ0,subSliceN);

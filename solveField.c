@@ -424,6 +424,7 @@ void solve_Field_U_1D(Domain *D,int iteration)
 {
    double Kr,K0;
    int h,numHarmony,i,startI,endI;
+   double complex before,after;
 
    numHarmony=D->numHarmony;
    startI=1;  endI=D->subSliceN+1;
@@ -431,8 +432,9 @@ void solve_Field_U_1D(Domain *D,int iteration)
    // field update
    for(h=0; h<numHarmony; h++)  {
      for(i=startI; i<endI; i++) {
-       D->U[h][i][0]=D->U[h][i][0]+D->ScU[h][i][0]*D->currentFlag;
+       D->U[h][i][0]+=D->ScU[h][i][0]*D->currentFlag;
 //       D->Ez[h][i][0]=D->ScEz[h][i][0];
+
      }
    }
 }
@@ -444,6 +446,7 @@ void solve_Sc_1D(Domain *D,int iteration)
    double coef,tmp,J1,J2,K,Kr,K0,xi,macro,JJ,w[2]; 
 	double gamma,invGam,ks,ku,dBessel;
    double dz,theta,area,emitX,emitY,gammaX,gammaY,sigX,sigY;
+   double complex tmpComp;
    ptclList *p;
    LoadList *LL;
    int myrank, nTasks,rank;
@@ -499,7 +502,7 @@ void solve_Sc_1D(Domain *D,int iteration)
              JJ=tmp*(J1-J2);				
 			  } else 
 			    JJ=0.0;
-           
+          
 			  D->ScU[h][i][0]+=JJ/(1.0)*macro*K*coef*cexp(-I*H*theta)*invGam;			  
 	      }		//End of harmony
 
@@ -551,7 +554,10 @@ void solve_Sc_1D(Domain *D,int iteration)
 
            for(l=0; l<L; l++) 
              Sc[l]+=-I*coef/(1.0+l)*macro*cexp(-I*(l+1)*theta);
-
+           if(isnan(cabs(Sc[0]))) { 
+              printf("iteration=%d, i=%d,theta=%g,macro=%g, coef=%g,l=%d\n",iteration,i,theta,macro,coef,l);  //lala
+              exit(0);
+           }
            p=p->next;
 			}
 

@@ -173,9 +173,9 @@ void loadBeam3D(Domain *D,LoadList *LL,int s,int iteration)
 
         gsl_qrng_get(q1,v1);
 
-        r1=v1[0];           r2=v1[1];
-        pr1=v1[2];          pr2=v1[3];
-        th=v1[4];	          gam=v1[5];
+        r1=v1[0]; if(r1==0.0) r1=1e-4;          r2=v1[1];
+        pr1=v1[2]; if(pr1==0.0) pr1=1e-4;       pr2=v1[3];
+        th=v1[4];	          gam=v1[5];  if(gam==0.0) gam=1e-4;
 	     th+=randTh;
 		  tmpInt=(int)th;
 		  th-=tmpInt;
@@ -209,7 +209,8 @@ void loadBeam3D(Domain *D,LoadList *LL,int s,int iteration)
         tmp=sqrt(-2.0*log(gam))*cos(v1[6]*2*M_PI);
 		  gam=gamma0+dGam*tmp*ESn0;
 
-		  theta0=(th*0.999)*(dPhi-2*M_PI);
+		  //theta0=(th*0.999)*(dPhi-2*M_PI);
+		  theta0=th*dPhi;
 
         pz=sqrt((gam*gam-1.0)/(1.0+xPrime*xPrime+yPrime*yPrime));
         px=xPrime*pz;
@@ -306,11 +307,12 @@ void loadBeam1D(Domain *D,LoadList *LL,int s,int iteration)
    ran = gsl_rng_alloc(T);
 
    gsl_qrng *q1=gsl_qrng_alloc(gsl_qrng_niederreiter_2,3);
+   //gsl_qrng *q1=gsl_qrng_alloc(gsl_qrng_sobol,3);	
    for(i=0; i<myrank; i++)  gsl_qrng_get(q1,v1);
    gsl_qrng *q2=gsl_qrng_alloc(gsl_qrng_sobol,2);	
 
+   srand(myrank);		
    for(i=startI; i<endI; i++) {
-     srand(i-startI+minI);		
      //position define     
      posZ=(i-startI+minI)*bucketZ+D->minZ;
 	  n0=0.0;
@@ -345,11 +347,16 @@ void loadBeam1D(Domain *D,LoadList *LL,int s,int iteration)
      for(b=0; b<beamlets; b++)  {
 
        gsl_qrng_get(q1,v1);
-       th=v1[0];           gam=v1[1];
+       th=v1[0];           gam=v1[1]; if(gam==0.0) gam=1e-4; else ;
 
+       //th=randomValue(1.0);
+       //v1[2]=randomValue(1.0);
+  	    //gam=randomValue(1.0)+1e-4;
        tmp=sqrt(-2.0*log(gam))*cos(v1[2]*2*M_PI);
        gam=gamma0+dGam*tmp;
-       theta0=(th*0.99)*(dPhi-2*M_PI);
+       theta0=(th)*(dPhi-(numInBeamlet-1.0)/(numInBeamlet*1.0)*2*M_PI);
+       //theta0=(th)*(2*M_PI-(numInBeamlet-1.0)/(numInBeamlet*1.0)*2*M_PI);
+       //theta0=(th)*(dPhi);  
 
        for(n=0; n<numInBeamlet; n++)  {		     
          New = (ptclList *)malloc(sizeof(ptclList));
@@ -361,8 +368,10 @@ void loadBeam1D(Domain *D,LoadList *LL,int s,int iteration)
          noise=0.0;
          for(m=1; m<=numInBeamlet/2; m++) {
            sigma=sqrt(2.0/eNumbers/(m*m*1.0));     //Fawley PRSTAB V5 070701 (2002)
-           an=gaussianDist_1D(sigma);
-           bn=gaussianDist_1D(sigma);
+           //an=gaussianDist_1D(sigma);
+           //bn=gaussianDist_1D(sigma);
+  	        an=gsl_ran_gaussian(ran,sigma);
+           bn=gsl_ran_gaussian(ran,sigma);
            noise += an*cos(m*theta)+bn*sin(m*theta);
          }				 
          tmp=theta + noise*noiseONOFF;
@@ -372,6 +381,7 @@ void loadBeam1D(Domain *D,LoadList *LL,int s,int iteration)
          New->theta=tmp;
 
          New->gamma=gam;		//gamma
+
          New->px=0.0;      New->py=0.0;       	//py
          New->weight=remacro;
          New->index=LL->index;  	//index

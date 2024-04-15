@@ -209,6 +209,7 @@ void parameterSetting(Domain *D,char *input)
    tmp=D->K0*D->K0*0.5/(1.0+D->K0*D->K0);
    JJ0=gsl_sf_bessel_J0(tmp)-gsl_sf_bessel_J1(tmp);
    D->beta0=1.0-0.5*(1.0+D->K0*D->K0)/D->gamma0/D->gamma0;
+   D->currentFlag=0;
 
 
    if(D->mode==Static || D->mode==Twiss) {
@@ -255,13 +256,13 @@ void parameterSetting(Domain *D,char *input)
 	D->chiList->next = NULL;
 	Chi = D->chiList;
 	rank = 1;
-	while(findChiLoadParameters(rank, Chi, D,input))
-	{
-		ChiNew = (ChiList *)malloc(sizeof(ChiList));
-		ChiNew->next = NULL;
-		Chi->next=ChiNew;
-		Chi=Chi->next;
-		rank ++;
+   while(findChiLoadParameters(rank, Chi, D,input))
+   {
+     ChiNew = (ChiList *)malloc(sizeof(ChiList));
+	  ChiNew->next = NULL;
+	  Chi->next=ChiNew;
+	  Chi=Chi->next;
+	  rank ++;
 	}
 	D->nChi = rank-1;
 
@@ -367,7 +368,7 @@ int findChiLoadParameters(int rank, ChiList *Chi,Domain *D,char *input)
    if(FindParameters("Chicane",rank,"chicane_ONOFF",input,str)) Chi->chiON=whatONOFF(str);
 	else Chi->chiON=OFF;
 
-   if(Chi->chiON>0) {
+   if(Chi->chiON==ON) {
      if(FindParameters("Chicane",rank,"delay_time",input,str)) Chi->delay=atof(str)*1e-15;
      else  { printf("In [Chicane], delay_time=? [fs]\n");  fail=1; }
      if(FindParameters("Chicane",rank,"position_z",input,str)) z0=atof(str);
@@ -404,7 +405,7 @@ int findChiLoadParameters(int rank, ChiList *Chi,Domain *D,char *input)
        if(FindParameters("Chicane",rank,"chi0",input,str)) Chi->chi0=atof(str);
        else  { printf("In [Chicane], chi0=? \n");  fail=1; }
 		 Chi->bragTh=asin(M_PI/(d*D->ks));
-		 if(myrank==0) printf("bragTh=%g\n",Chi->bragTh*180/M_PI);
+       if (myrank==0) printf("brag angle=%g\n",Chi->bragTh*180/M_PI);
 	  } else ;
    }
    if(fail==1)  exit(0); else ;

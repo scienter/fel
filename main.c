@@ -48,6 +48,7 @@ int main(int argc, char *argv[])
     //create mesh
     boundary(&D);
 //printf("myrank=%d,iteration=%d, boundary is done\n",myrank,iteration);
+
  
 //    removeFile(&D);
 
@@ -107,15 +108,17 @@ int main(int argc, char *argv[])
 		//Chicane
       chicane_test(&D,iteration);
       if(D.calChicaneFlag==ON) {
-       	calParticleDelay(&D);
+       	calParticleDelay(&D,iteration);
        	rearrangeChicaneParticle(&D);
-       	shiftChicaneField(&D);
-			if(myrank==0) printf("Chicane is performed. at step=%d\n",iteration); else ;
-         if(D.chi_SSON==ON) { 
+    
+         if(D.chi_SSON==ON) {
+           seed_Field_test(&D);
 			  selfSeed_Field(&D);
 			  if(myrank==0) printf("self-seeding is performed. at step=%d\n",iteration); 
-			  else ;
-			} else ;
+         } else {
+       	  shiftChicaneField(&D);
+			  if(myrank==0) printf("Chicane is performed. at step=%d\n",iteration); else ;
+			}
 
       } else {
 			
@@ -169,11 +172,13 @@ int main(int argc, char *argv[])
 
     // save total energy for all steps
     saveTotalEnergy(&D);
+//printf("myrank=%d,iteration=%d, saveTotalEnergy is done\n",myrank,iteration);
     if(myrank==0) {
 //      if(D.mode==Static || D.mode==Twiss) 
 	      save_twiss(&D);
 //      else;
     } else ;
+//printf("myrank=%d,iteration=%d, savetwiss is done\n",myrank,iteration);
 
     end=clock();
 	 time_spent=(end-begin)/CLOCKS_PER_SEC/60.0;

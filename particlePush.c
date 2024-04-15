@@ -444,8 +444,10 @@ void push_theta_gamma_1D(Domain *D,int iteration)
     double coef,JJ,J1,J2,wakeE,absU,absU2;
     double k1,k2,k3,k4,l1,l2,l3,l4;
 	 double beta1,beta2,beta3,beta4;
-	 double sumGam1,sumGam2,sumGam3,sumGam4;
+	 double sumGam1,sumGam2,sumGam3,sumGam4,before;
     ptclList *p;
+    int myrank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
 
     L = D->SCLmode;
     startI=1;       endI=D->subSliceN+1;
@@ -461,21 +463,23 @@ void push_theta_gamma_1D(Domain *D,int iteration)
     for(i=startI; i<endI; i++)
     {
       if(D->wakeONOFF==ON) wakeE=D->wakeE[i-startI+minI]/mc2*1e-6;
-      else                wakeE=0.0;      
+      else                 wakeE=0.0;      
 
+      for(ll=0; ll<L; ll++) 
+		  Em[ll]=D->Ez[i][0][ll][0];
+
+      for(h=0; h<numHarmony; h++)  
+		  U[h]=D->U[h][i][0];
+      
       for(s=0; s<D->nSpecies; s++)  {
         p=D->particle[i].head[s]->pt;
+
         while(p) {
 
-          for(ll=0; ll<L; ll++) 
-			   Em[ll]=D->Ez[i][0][ll][0];
-
-          for(h=0; h<numHarmony; h++)  
-		      U[h]=D->U[h][i][0];
-      
           K=K0;
 
           theta=p->theta;
+          before=p->gamma;
           gamma=p->gamma; invGam=1.0/gamma;
           invBeta = 1.0-(1.0 + K*K)*0.5*invGam*invGam;
           invBeta = 1.0/invBeta;
@@ -486,15 +490,14 @@ void push_theta_gamma_1D(Domain *D,int iteration)
 			   if(H%2==1) {
               coef=pow(-1.0,(H-1)*0.5);
               idx=(int)(H*xi/dBessel);
-				  if(idx>bn) printf("1 : idx=%d\n",idx);
-				  if(idx>bn-1) idx=bn-2;
+				  if(idx>bn-1) { printf("idx=%d\n",idx); idx=bn-2; }
               w[1]=(H*xi/dBessel)-idx; w[0]=1.0-w[1];
               order=(H-1)*0.5;
               J1=D->BesselJ[idx][order]*w[0]+D->BesselJ[idx+1][order]*w[1];
               order=(H+1)*0.5;
               J2=D->BesselJ[idx][order]*w[0]+D->BesselJ[idx+1][order]*w[1];
               JJ=coef*(J1-J2);
-				}
+				} else JJ=0.0;
             compVal=U[h]*cexp(I*H*theta);
             sumTh -=2*JJ*K*cimag(compVal);
             sumGam-=2*JJ*K*creal(compVal);
@@ -504,11 +507,15 @@ void push_theta_gamma_1D(Domain *D,int iteration)
             tmp=creal(Em[ll]*cexp(I*(ll+1)*theta));
             sumEzPart += 2.0*tmp;
           }
-          k1=(ku-ks*(1.0+K*K+sumTh)*0.5*invGam*invGam)*invBeta;
-          l1=(ks*sumGam/2.0*invGam*invBeta + e_mc2*sumEzPart);
+          k1=dz*(ku-ks*(1.0+K*K+sumTh)*0.5*invGam*invGam)*invBeta;
+          l1=dz*(ks*sumGam/2.0*invGam*invBeta + e_mc2*sumEzPart);
+          if(isinf(l1)) {
+            printf("iteration=%d, i=%d,l1=%g, gamma=%g\n",iteration,i,l1,gamma);
+            exit(0);
+          }
 			 
-	       theta=p->theta+0.5*dz*k1;
-          gamma=p->gamma+0.5*dz*l1; invGam=1.0/gamma;
+	       theta=p->theta+0.5*k1;
+          gamma=p->gamma+0.5*l1; invGam=1.0/gamma;
           invBeta = 1.0-(1.0 + K*K)*0.5*invGam*invGam;
           invBeta = 1.0/invBeta;
           sumTh=sumGam=0.0;
@@ -518,15 +525,14 @@ void push_theta_gamma_1D(Domain *D,int iteration)
 			   if(H%2==1) {
               coef=pow(-1.0,(H-1)*0.5);
               idx=(int)(H*xi/dBessel);
-				  if(idx>bn) printf("2 : idx=%d\n",idx);
-				  if(idx>bn-1) idx=bn-2;
+				  if(idx>bn-1) { printf("idx=%d\n",idx); idx=bn-2; }
               w[1]=(H*xi/dBessel)-idx; w[0]=1.0-w[1];
               order=(H-1)*0.5;
               J1=D->BesselJ[idx][order]*w[0]+D->BesselJ[idx+1][order]*w[1];
               order=(H+1)*0.5;
               J2=D->BesselJ[idx][order]*w[0]+D->BesselJ[idx+1][order]*w[1];
               JJ=coef*(J1-J2);
-				}
+				} else JJ=0.0;
             compVal=U[h]*cexp(I*H*theta);
             sumTh -=2*JJ*K*cimag(compVal);
             sumGam-=2*JJ*K*creal(compVal);
@@ -536,11 +542,11 @@ void push_theta_gamma_1D(Domain *D,int iteration)
             tmp=creal(Em[ll]*cexp(I*(ll+1)*theta));
             sumEzPart += 2.0*tmp;
           }
-          k2=(ku-ks*(1.0+K*K+sumTh)*0.5*invGam*invGam)*invBeta;
-          l2=(ks*sumGam/2.0*invGam*invBeta + e_mc2*sumEzPart);
+          k2=dz*(ku-ks*(1.0+K*K+sumTh)*0.5*invGam*invGam)*invBeta;
+          l2=dz*(ks*sumGam/2.0*invGam*invBeta + e_mc2*sumEzPart);
 
-	       theta=p->theta+0.5*dz*k2;
-          gamma=p->gamma+0.5*dz*l2; invGam=1.0/gamma;
+	       theta=p->theta+0.5*k2;
+          gamma=p->gamma+0.5*l2; invGam=1.0/gamma;
           invBeta = 1.0-(1.0 + K*K)*0.5*invGam*invGam;
           invBeta = 1.0/invBeta;
           sumTh=sumGam=0.0;
@@ -550,15 +556,14 @@ void push_theta_gamma_1D(Domain *D,int iteration)
 			   if(H%2==1) {
               coef=pow(-1.0,(H-1)*0.5);
               idx=(int)(H*xi/dBessel);
-				  if(idx>bn) printf("2 : idx=%d\n",idx);
-				  if(idx>bn-1) idx=bn-2;
+				  if(idx>bn-1) { printf("idx=%d\n",idx); idx=bn-2; }
               w[1]=(H*xi/dBessel)-idx; w[0]=1.0-w[1];
               order=(H-1)*0.5;
               J1=D->BesselJ[idx][order]*w[0]+D->BesselJ[idx+1][order]*w[1];
               order=(H+1)*0.5;
               J2=D->BesselJ[idx][order]*w[0]+D->BesselJ[idx+1][order]*w[1];
               JJ=coef*(J1-J2);
-				}
+				} else JJ=0.0;
             compVal=U[h]*cexp(I*H*theta);
             sumTh -=2*JJ*K*cimag(compVal);
             sumGam-=2*JJ*K*creal(compVal);
@@ -568,11 +573,11 @@ void push_theta_gamma_1D(Domain *D,int iteration)
             tmp=creal(Em[ll]*cexp(I*(ll+1)*theta));
             sumEzPart += 2.0*tmp;
           }
-          k3=(ku-ks*(1.0+K*K+sumTh)*0.5*invGam*invGam)*invBeta;
-          l3=(ks*sumGam/2.0*invGam*invBeta + e_mc2*sumEzPart);
+          k3=dz*(ku-ks*(1.0+K*K+sumTh)*0.5*invGam*invGam)*invBeta;
+          l3=dz*(ks*sumGam/2.0*invGam*invBeta + e_mc2*sumEzPart);
 
-	       theta=p->theta+dz*k3;
-          gamma=p->gamma+dz*l3; invGam=1.0/gamma;
+	       theta=p->theta+k3;
+          gamma=p->gamma+l3; invGam=1.0/gamma;
           invBeta = 1.0-(1.0 + K*K)*0.5*invGam*invGam;
           invBeta = 1.0/invBeta;
           sumTh=sumGam=0.0;
@@ -582,15 +587,14 @@ void push_theta_gamma_1D(Domain *D,int iteration)
 			   if(H%2==1) {
               coef=pow(-1.0,(H-1)*0.5);
               idx=(int)(H*xi/dBessel);
-				  if(idx>bn) printf("2 : idx=%d\n",idx);
-				  if(idx>bn-1) idx=bn-2;
+				  if(idx>bn-1) { printf("idx=%d\n",idx); idx=bn-2; }
               w[1]=(H*xi/dBessel)-idx; w[0]=1.0-w[1];
               order=(H-1)*0.5;
               J1=D->BesselJ[idx][order]*w[0]+D->BesselJ[idx+1][order]*w[1];
               order=(H+1)*0.5;
               J2=D->BesselJ[idx][order]*w[0]+D->BesselJ[idx+1][order]*w[1];
               JJ=coef*(J1-J2);
-				}
+				} else JJ=0.0;
             compVal=U[h]*cexp(I*H*theta);
             sumTh -=2*JJ*K*cimag(compVal);
             sumGam-=2*JJ*K*creal(compVal);
@@ -600,14 +604,20 @@ void push_theta_gamma_1D(Domain *D,int iteration)
             tmp=creal(Em[ll]*cexp(I*(ll+1)*theta));
             sumEzPart += 2.0*tmp;
           }
-          k4=(ku-ks*(1.0+K*K+sumTh)*0.5*invGam*invGam)*invBeta;
-          l4=(ks*sumGam/2.0*invGam*invBeta + e_mc2*sumEzPart);
+          k4=dz*(ku-ks*(1.0+K*K+sumTh)*0.5*invGam*invGam)*invBeta;
+          l4=dz*(ks*sumGam/2.0*invGam*invBeta + e_mc2*sumEzPart);
 
           tmp=dz/6.0*(k1+2*k2+2*k3+k4);
-	       if(tmp>dPhi || tmp<-dPhi) 
-            printf("iteration=%d, dTheta=%g, sumEzPart=%g\n",iteration,tmp,sumEzPart);
+	       if(tmp>dPhi || tmp<-dPhi) { 
+            printf("iteration=%d, dTheta=%g, sumEzPart=%g, U[0]=%g\n",iteration,tmp,sumEzPart,cabs(D->U[0][i][0]));  //lala
+            exit(0);
+          }
           p->theta+=tmp;
-          p->gamma+=dz/6.0*(l1+2*l2+2*l3+l4);
+          p->gamma+=dz/6.0*(l1+2*l2+2*l3+l4) - wakeE*dz;
+          if(isinf(p->gamma)) {
+             printf("iteration=%d,i=%d,gamma=%g,l1=%g,l2=%g,l3=%g,l4=%g,wakeE=%g,beforeGam=%g\n",iteration,i,p->gamma,l1,l2,l3,l4,wakeE,before);
+             exit(0);
+          }
 
 	       p=p->next;
         }
