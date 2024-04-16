@@ -212,3 +212,4 @@ void rearrangeChicaneParticle(Domain *D);
 void shiftChicaneField(Domain *D);
 void selfSeed_Field(Domain *D);
 void seed_Field_test(Domain *D);
+void saveBFactor(Domain *D,int iteration);

@@ -49,7 +49,7 @@ void parameterSetting(Domain *D,char *input)
    int FindParameters();
    int whatONOFF();
    char str[100],name[100],fileName[100];
-   int rank,tmpInt,sub,remain,fail=0;
+   int rank,tmpInt,sub,remain,maxStep,step_length,fail=0;
    double B0,tmp,JJ0,area;
 
    //initially
@@ -92,6 +92,8 @@ void parameterSetting(Domain *D,char *input)
    //Domain parameter setting
    if(FindParameters("Save",1,"max_time",input,str)) D->maxTime=atoi(str);
    else  D->maxTime=525600;
+   if(FindParameters("Save",1,"max_step",input,str)) maxStep=atoi(str);
+   else  maxStep=5000;
    if(FindParameters("Save",1,"total_length",input,str)) D->Lz=atof(str);
    else  { printf("In [Save], total_length=? [m].\n");  fail=1;  }
    if(FindParameters("Domain",1,"lambdaUs_in_iteration",input,str)) D->numLambdaU=atoi(str);
@@ -224,7 +226,10 @@ void parameterSetting(Domain *D,char *input)
       printf("Too much slices. sliceN=%d.\n",D->sliceN);
       exit(0);
    } else ;
-   D->maxStep=(int)(D->Lz/D->dz+1);
+	step_length=(int)(D->Lz/D->dz+1);
+	if(maxStep>=step_length) D->maxStep=step_length;
+	else D->maxStep=maxStep;
+
 //   if(D->mode==Time_Dependent) {
 //     if(D->maxStep>D->sliceN) D->maxStep=D->sliceN; else ;
 //   } else ;

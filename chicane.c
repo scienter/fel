@@ -55,7 +55,7 @@ void calParticleDelay(Domain *D,int iteration)
             printf("iteration=%d,i=%d,tmp=%g,dz1=%g,gamma=%g,vz=%g,B0=%g,th0=%g,ld=%g\n",iteration,sliceI,tmp,dz1,p->gamma,vz,B0,th0,ld);
             exit(0);  //lala
          }
-         p->theta+=(shiftZ0-shiftZ)*dPhi;
+         p->theta-=(shiftZ0-shiftZ)*dPhi;
          
 
 			if(fabs(shiftZ-shiftZ0)>=subSliceN) {

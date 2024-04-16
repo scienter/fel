@@ -90,6 +90,7 @@ int main(int argc, char *argv[])
         if(iteration%D.saveStep==0 || iteration==D.maxStep-1) {
 	       if(D.particleSave==ON)  saveParticleHDF(&D,iteration); else ;
           if(D.fieldSave==ON)     saveFieldHDF(&D,iteration); else ;
+          saveBFactor(&D,iteration);
 
           end=clock();
 		    time_spent=(end-begin)/CLOCKS_PER_SEC/60.0;

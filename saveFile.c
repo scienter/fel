@@ -6,517 +6,71 @@
 #include "mpi.h"
 #include <gsl/gsl_sf_bessel.h>
 
-//void saveParticleHDF(Domain *D,int iteration,int s,double minPx,double density);
-//void saveDensityHDF(Domain *D,int iteration);
-//void saveEFieldHDF(Domain *D,int iteration);
-//void saveBFieldHDF(Domain *D,int iteration);
-
-void saveParticle(Domain *D,int iteration,int sliceI);
-void saveField(Domain *D,int iteration);
-//void saveBFactor(Domain *D,int iteration);
-
-
-void saveFile(Domain D,int iteration,int sliceI)
-{
-  int myrank, nTasks,s;
-  MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
-  LoadList *LL;
-
-  //save field
-  if(D.fieldSave==ON)   {
-    if(D.saveFieldMode==TXT)  
-      saveField(&D,iteration);
-//      saveBFactor(&D,iteration);
-//    else if(D.saveFieldMode==HDF)   {
-//      saveEFieldHDF(&D,iteration);
-//      saveBFieldHDF(&D,iteration);
-//    }  else	;
-  }	else	;
-
-/*
-  //save density
-  if(D.densitySave==ON)
-  {
-    if(D.saveDensityMode==TXT)
-      saveDensity(&D,iteration);
-    else if(D.saveDensityMode==HDF)
-      saveDensityHDF(&D,iteration);
-    if(myrank==0)
-      printf("density%d is made.\n",iteration); 
-  }  else	;
- 
-  //save current
-  if(D.currentSave==ON)
-  {
-    if(D.saveCurrentMode==TXT)
-      saveCurrent(&D,iteration);
-//    else if(D.saveCurrentMode==HDF)
-//      saveCurrentHDF(&D,iteration);
-    if(myrank==0)
-      printf("current%d is made.\n",iteration); 
-  }  else	;
- */
-
-}
-
-/*
 void saveBFactor(Domain *D,int iteration)
 {
-    int i,sliceN;
-    double bucketX,x,x0,b;
-    char name[100];
-    FILE *out;
-    int myrank, nprocs;    
-    MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
+   int i,j,s,startI,endI,minI,sliceI,sliceN,numSlice,rank,cnt;
+	double bucketZ,z,theta,*data,*recvData;
+	double complex sum;
+   LoadList *LL;
+	ptclList *p;
+   char name[100];
+   FILE *out;
 
-    x0=D->dx*iteration+D->minX+D->lambda0*0.5;
-    bucketX=D->numSlice*D->lambda0;
-    sliceN=D->sliceN;
+   int myrank, nTasks;    
+   MPI_Status status;
+	MPI_Comm_size(MPI_COMM_WORLD, &nTasks);
+	MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
 
-    sprintf(name,"bFact%d_%d",iteration,myrank);
-    out = fopen(name,"w");
+   startI=1;  endI=D->subSliceN+1;
+	minI=D->minI;
 
-    switch(D->dimension) {
-    case 1:
-      for(i=0; i<sliceN; i++) {
-        x=i*bucketX+x0;
-        b=D->bFact[iteration][i][0];
-        fprintf(out,"%.12g %g\n",x,b);
-      }
-      break;
-    default :
-      printf("In saveBFactor, what dimension?\n");
-    }
-
-    printf("%s is made.\n",name);
-    fclose(out);
-}
-*/
-
-void saveField(Domain *D,int iteration)
-{
-    int k,i,j,h,harmony,sliceN,subNz,nx,ny,step,minI;
-    double bucketX,UR,UI,P,coef,coef2,minX,minY,minZ,x0,area;
-    double dz,dx,dy,z,x,y,u;
-    char name[100];
-    FILE *out;
-    int myrank, nprocs;    
-    MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
-
-    minI=D->minI;
-    minZ=D->minZ;    minX=D->minX;  minY=D->minY;
-    dz=D->dz;        dx=D->dx;	    dy=D->dy;
-    subNz=D->subSliceN; nx=D->nx;      ny=D->ny;
-    x0=D->dx*iteration+D->minX+D->lambda0*0.5;
-    bucketX=D->numSlice*D->lambda0;
-    sliceN=D->sliceN;
-    harmony=D->harmony;
-
-    sprintf(name,"field%d_%d",iteration,myrank);
-    out = fopen(name,"w");
-
-//    area=2*M_PI*D->spotSigR*D->spotSigR;
-    coef=eMass*velocityC*velocityC*D->ks/eCharge;
-    coef2=coef*coef*eps0*velocityC*area;
-//    coef=eMass*D->ks*velocityC*velocityC*sqrt(2.0)/eCharge;
-     
-    step=iteration%D->saveStep;
-    switch(D->dimension) {
-    case 1:
-      x=0;
-      y=0;
-      i=j=0;
-      for(k=0; k<subNz; k++) {
-        z=minZ+(k+minI)*dz;
-        u=cabs(D->U[step][0][k][j*nx+i]);
-        fprintf(out,"%g %g %g %g\n",z,x,y,u);
-      }
-      break;
-    case 3:
-      for(k=0; k<subNz; k++) {
-        z=minZ+(k+minI)*dz;
-        for(i=0; i<nx; i++) {
-          x=minX+i*dx;
-          for(j=0; j<ny; j++) {
-            y=minY+j*dy;
-	    u=cabs(D->U[step][0][k][j*nx+i]);
-            fprintf(out,"%g %g %g %g\n",z,x,y,u);
+	numSlice=D->sliceN+2;
+	recvData=(double *)malloc(numSlice*sizeof(double ));
+	data=(double *)malloc(numSlice*sizeof(double ));
+	for(i=0; i<numSlice; i++) data[i]=0.0;
+	
+   for(i=startI; i<endI; i++)
+   {
+	  sliceI=i+minI;
+	  cnt=0;
+	  sum=0.0+I*0.0;
+     for(s=0; s<D->nSpecies; s++)  {
+       p=D->particle[i].head[s]->pt;
+       while(p) {
+         theta=p->theta;
+			sum+=cexp(I*theta);
+			cnt++;
+			p=p->next;
+		 }
 	  }
-          fprintf(out,"\n");
-        }
-        fprintf(out,"\n");
-      }
-      break;
-    default :
-      printf("what field_type? and what dimension?\n");
-    }
-    printf("%s is made.\n",name);
-    fclose(out);
+     if(cnt>0) data[sliceI]=cabs(sum)/(cnt*1.0);
+	}
+
+   if(myrank==0)  {
+     for(rank=1; rank<nTasks; rank++) {
+	    MPI_Recv(recvData,numSlice,MPI_DOUBLE,rank,rank,MPI_COMM_WORLD,&status);
+       for(i=0; i<numSlice; i++)
+         data[i]+=recvData[i];
+     }
+	} else {
+	  for(rank=1; rank<nTasks; rank++) {
+	    if(myrank==rank)
+		   MPI_Send(data,numSlice,MPI_DOUBLE,0,myrank,MPI_COMM_WORLD);
+     }
+   }
+
+   bucketZ=D->numSlice*D->lambda0;
+   if(myrank==0) {
+     sprintf(name,"bFact%d",iteration);
+     out = fopen(name,"w");
+
+     for(i=1; i<numSlice+1; i++) {
+       z=(i-numSlice*0.5)*bucketZ;
+       fprintf(out,"%g %g\n",z,data[i]);
+     }
+	  fclose(out);
+     printf("%s is made.\n",name);
+   } else ;
 
 }
-
-/*
-void savePower(Domain *D)
-{
-    int n,i,h,harmony;
-    double x,P[D->harmony],coef1,coef2,coef,area,UR,UI,sum,b,K,KMR,tmp,JJ0,gammaR;
-    double phase[D->harmony];
-    char name[100];
-    FILE *out;
-    int myrank, nprocs;    
-    MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
-
-    harmony=D->harmony;
-    area=M_PI*D->spotSigR*D->spotSigR;
-    coef1=eMass*velocityC*velocityC*D->ks/eCharge;
-    coef2=coef1*coef1*eps0*velocityC*area*0.5;
-
-    if(D->mode==Static) coef=coef2/(D->sliceN*1.0);
-    else                coef=coef2*(D->lambda0/velocityC*D->numSlice);
-
-
-    sprintf(name,"track");
-    out = fopen(name,"w");
-
-//    area=2*M_PI*D->spotSigR*D->spotSigR;
-//    coef=eMass*velocityC*velocityC*D->ks/eCharge;
-//    coef2=coef*coef*0.5*eps0*velocityC*area;
-
-    switch(D->dimension) {
-    case 1:
-      for(n=0; n<=D->maxStep; n++)
-      {
-        x=n*D->dx;
-        fprintf(out,"%.12g ",x);
-        sum=0.0;
-        for(i=0; i<D->sliceN; i++)  {    
-          b=D->bFact[n][i][0];
-          sum+=b;
-        }
-        b=sum/(D->sliceN*1.0);
-        fprintf(out,"%g ",b);
-
-        for(h=0; h<harmony; h++)  {
-          P[h]=0.0;
-	  phase[h]=0.0;
-          for(i=0; i<D->sliceN; i++)  {    
-            UR=D->UR[n][i][h];
-            UI=D->UI[n][i][h];
-            P[h]+=UR*UR+UI*UI;
-            phase[h]+=atan2(UI,UR);
-          }
-          P[h]*=coef;
-          fprintf(out,"%g ",P[h]);
-        }
-	K=D->Kfield[n][0][0];
-        tmp=K*K*0.5/(1.0+K*K);
-        JJ0=gsl_sf_bessel_J0(tmp)-gsl_sf_bessel_J1(tmp);
-	gammaR=sqrt(D->ks/D->ku*0.5*(1+K*K+P[0]/coef2));
-//	gammaR=sqrt(D->ks/D->ku*0.5*(1+K*K));
-//	printf("x=%g,JJ=%g,a[0]=%g\n",x,JJ0,sqrt(P[0]/coef2));
-
-	KMR=sqrt(sqrt(P[0]/coef)*K*JJ0*D->ks/D->ku);
-
-        fprintf(out,"%g %g %g %g\n",K,KMR,gammaR,phase[0]/(D->sliceN*1.0));
-      }
-      break;
-    default :
-      printf("In savePower, what dimension?\n");
-    }
-
-    printf("%s is made.\n",name);
-    fclose(out);
-}
-*/
-void saveParticle(Domain *D,int iteration,int sliceI)
-{
-  int i,s,index,totalCnt,subCnt;
-  double dPhi,z0,bucketZ,minZ,tmp,w;
-  double z,x,y,px,py,theta,gamma,weight;
-  char name[100];
-  LoadList *LL;
-  ptclList *p;
-  FILE *out;
-  int myrank, nprocs;    
-  MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
-
-  minZ=D->minZ;
-  dPhi=D->numSlice*2*M_PI;
-  z0=iteration*D->dz;
-  bucketZ=D->numSlice*D->lambda0;
-
-  LL=D->loadList;
-  s=0;
-  while(LL->next) {
-    sprintf(name,"%dParticle%d_%d",s,iteration,myrank);
-    out = fopen(name,"w");    
-
-    totalCnt=LL->totalCnt;
-    subCnt=LL->subCnt;
-
-      p=D->head[s]->pt;
-      while(p) {
-        theta=p->theta;
-        tmp=theta/dPhi;
-        w=tmp-(int)tmp;
-        theta=w*dPhi;
-        if(theta>dPhi)   theta=theta-dPhi;
-        else if(theta<0) theta=dPhi+theta;
-
-        z=z0+(sliceI+theta/dPhi)*bucketZ+minZ; 
-        x=p->x;        y=p->y;
-        px=p->px;      py=p->py;
-        gamma=p->gamma;
-        weight=p->weight;
-        index=p->index;
-        fprintf(out,"%.16g %g %g %g %g %g %g %g %d\n",z,x,y,gamma,px,py,theta,weight,index);
-
-	p=p->next;
-      }	//End of while(p)
-    fclose(out);
-    printf("%s is made.\n",name);
-
-    LL=LL->next;
-    s++;
-  }
-}
-
-/*
-void saveDensity(Domain *D,int iteration)
-{
-    int i,j,k,istart,iend,jstart,jend,kstart,kend,s,ii,jj,kk,i1,j1,k1;
-    int l,m,n;
-    double x,y,z,Wx[3],Wy[3],Wz[3],weight,charge;
-    char name[100];
-    Particle ***particle;
-    particle=D->particle;
-    ptclList *p;
-    LoadList *LL;
-    FILE *out;
-    int myrank, nTasks;
-    MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
-
-    istart=D->istart;    iend=D->iend;
-    jstart=D->jstart;    jend=D->jend;
-    kstart=D->kstart;    kend=D->kend;
-
-    double rho0[D->nSpecies];
-    s=0;
-    LL=D->loadList;
-    while(LL->next)
-    {
-       rho0[s]=LL->density;
-       LL=LL->next;
-       s++;
-    }
-
-    switch (D->dimension)  {
-    //1D
-    case 1 :
-      j=k=0;
-      //initializing density
-      for(s=0; s<D->nSpecies; s++)
-      {
-        for(i=0; i<iend+3; i++)   D->Rho[i][j][k]=0.0;
-      
-        for(i=istart; i<iend; i++)
-        {
-          p=particle[i][j][k].head[s]->pt;
-          while(p)            {
-            weight=p->weight; charge=p->charge;
-            x=p->x;
-            i1=(int)(i+x+0.5);
-            x=i+x-i1;
-            Wx[0]=0.5*(0.5-x)*(0.5-x);
-            Wx[1]=0.75-x*x;
-            Wx[2]=0.5*(x+0.5)*(x+0.5);
-            for(ii=0; ii<3; ii++)  {
-              l=i1-1+ii;
-              if(istart<=l && l<iend)
-                D->Rho[l][j][k]+=Wx[ii]*rho0[s]*weight*charge;
-              else	;
-            }
-            p=p->next;
-          }
-        }
-
-        sprintf(name,"%ddensity%d_%d",s,iteration,myrank);
-        out = fopen(name,"w");    
-        for(i=istart-1; i<=iend; i++)     {
-          x=(i-istart+D->minXSub)*D->dx*D->lambda;
-          fprintf(out,"%g %g\n",x,D->Rho[i][j][k]);    
-        }
-        fclose(out);
-      }		//End for(S)
-      break;
-
-    //2D
-    case 2 :
-      k=0;
-      //initializing density
-      for(i=0; i<=iend; i++)
-        for(j=jstart-1; j<=jend; j++)
-          D->Rho[i][j][k]=0.0;
-
-      for(i=istart; i<iend; i++)
-        for(j=jstart; j<jend; j++)
-          for(s=0; s<D->nSpecies; s++)
-          {
-            p=particle[i][j][k].head[s]->pt;
-            while(p)
-            {
-              weight=p->weight;
-              x=p->x; y=p->y; z=p->z;
-              i1=(int)(i+x+0.5);
-              j1=(int)(j+y+0.5);
-              x=i+x-i1;
-              y=j+y-j1;
-              Wx[0]=0.5*(0.5-x)*(0.5-x);
-              Wx[1]=0.75-x*x;
-              Wx[2]=0.5*(x+0.5)*(x+0.5);
-              Wy[0]=0.5*(0.5-y)*(0.5-y);
-              Wy[1]=0.75-y*y;
-              Wy[2]=0.5*(y+0.5)*(y+0.5);
-
-              for(jj=0; jj<3; jj++)
-                for(ii=0; ii<3; ii++)
-                {
-                  l=i1-1+ii;
-                  m=j1-1+jj;
-                  if(istart<=l && l<iend && jstart<=m && m<jend)
-                    D->Rho[l][m][k]+=Wx[ii]*Wy[jj]*rho0[s]*weight;
-                }
-              p=p->next;
-            }
-          }
-
-      sprintf(name,"density%d_%d",iteration,myrank);
-      out = fopen(name,"w");    
-      for(i=istart-1; i<=iend; i++)
-      {
-        for(j=jstart-1; j<=jend; j++)
-        {
-          x=(i-istart+D->minXSub)*D->dx*D->lambda;
-          y=(j-jstart+D->minYSub)*D->dy*D->lambda;
-          fprintf(out,"%g %g %g\n",x,y,D->Rho[i][j][k]);    
-        }           
-        fprintf(out,"\n");    
-      }
-      fclose(out);
-
-      break;
-
-    case 3 :
-      //initializing density
-      for(i=0; i<=iend; i++)
-        for(j=jstart-1; j<=jend; j++)
-          for(k=kstart-1; k<=kend; k++)
-            D->Rho[i][j][k]=0.0;
-
-      for(i=istart-1; i<iend-1; i++)
-        for(j=jstart-1; j<jend-1; j++)
-          for(k=kstart-1; k<=kend; k++)
-            for(s=0; s<D->nSpecies; s++)
-            {
-              p=particle[i][j][k].head[s]->pt;
-              while(p)
-              {
-                x=p->x; y=p->y; z=p->z;
-                i1=(int)(i+x+0.5);
-                j1=(int)(j+y+0.5);
-                k1=(int)(k+z+0.5);
-                x=i+x-i1;
-                y=j+y-j1;
-                z=k+z-k1;
-                Wx[0]=0.5*(0.5-x)*(0.5-x);
-                Wx[1]=0.75-x*x;
-                Wx[2]=0.5*(x+0.5)*(x+0.5);
-                Wy[0]=0.5*(0.5-y)*(0.5-y);
-                Wy[1]=0.75-y*y;
-                Wy[2]=0.5*(y+0.5)*(y+0.5);
-                Wz[0]=0.5*(0.5-z)*(0.5-z);
-                Wz[1]=0.75-z*z;
-                Wz[2]=0.5*(z+0.5)*(z+0.5);
-
-                for(ii=0; ii<3; ii++)
-                  for(jj=0; jj<3; jj++)
-                    for(kk=0; kk<3; kk++)
-                      D->Rho[i1-1+ii][j1-1+jj][k1-1+kk]
-                            +=Wx[ii]*Wy[jj]*Wz[kk]*rho0[s];
-                p=p->next;
-              }
-            }
-
-      sprintf(name,"density%d_%d",iteration,myrank);
-      out = fopen(name,"w");    
-      for(i=istart-1; i<=iend; i++)
-      {
-        for(j=jstart-1; j<=jend; j++)
-        {
-          for(k=kstart-1; k<=kend; k++)
-          {
-            x=(i-istart+D->minXSub)*D->dx*D->lambda;
-            y=(j-jstart+D->minYSub)*D->dy*D->lambda;
-            z=(k-kstart+D->minZSub)*D->dz*D->lambda;
-            fprintf(out,"%g %g %g %g\n",x,y,z,D->Rho[i][j][k]);    
-          }           
-          fprintf(out,"\n");    
-        }           
-        fprintf(out,"\n");    
-      }
-      fclose(out);
-      break;
-
-    }
-
-}
-*/
-
-/*
-void saveCurrent(Domain *D,int iteration)
-{
-    int i,j,k,istart,iend,jstart,jend,kstart,kend;
-    char name[100];
-    double x,y,z,Jx,Jy,Jz;
-    FILE *out;
-    int myrank, nprocs;    
-    MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
-
-    istart=D->istart;    iend=D->iend;
-    jstart=D->jstart;    jend=D->jend;
-    kstart=D->kstart;    kend=D->kend;
-
-    sprintf(name,"current%d_%d",iteration,myrank);
-    out = fopen(name,"w");
-
-    switch(D->dimension) {
-
-    case 1:
-      j=k=0;
-      for(i=istart; i<iend; i++)      {
-        x=(i-2+D->minXSub)*D->dx*D->lambda;
-        Jx=D->Jx[i][j][k]; Jy=D->Jy[i][j][k]; Jz=D->Jz[i][j][k];
-        fprintf(out,"%g %g %g %g\n",x,Jx,Jy,Jz);
-      }
-      fclose(out);
-      break;
-
-    case 2:
-      k=0;
-      for(i=istart; i<iend; i++)    {
-        for(j=jstart; j<jend; j++)        {
-          x=(i-2+D->minXSub)*D->dx*D->lambda;
-          y=(j-2+D->minYSub)*D->dy*D->lambda;
-          Jx=D->Jx[i][j][k]; Jy=D->Jy[i][j][k]; Jz=D->Jz[i][j][k];
-          fprintf(out,"%g %g %g %g %g\n",x,y,Jx,Jy,Jz);
-        }
-        fprintf(out,"\n");                 
-      }
-      fclose(out);
-      break;
-    default :
-      printf("In saveCurrent, what dimension?\n");
-    }
-}
-*/
 
