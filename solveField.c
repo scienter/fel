@@ -206,8 +206,8 @@ void solve_Sc_3D(Domain *D,int iteration)
 {
    int sliceI,i,j,ii,jj,s,h,H,numHarmony,order,nx,ny,N;  
    int startI,endI,nSpecies,idx;
-   double coef,tmp,J1,J2,K,K0,xi,macro,invG,JJ,amp,arg,dBessel,chi; 
-   double kx,ky,x,y,dx,dy,dz,theta,minX,minY,wx[2],wy[2],ks,ku,w[2];
+   double coef,tmp,J1,J2,K,K0,xi,macro,JJ,amp,arg,dBessel,chi,invG; 
+   double kx,ky,x,y,dx,dy,dz,theta,minX,minY,wx[2],wy[2],ks,lambdaU,w[2];
    double complex macro_K_invG_expTheta_coef,tmpComp;
    ptclList *p;
    LoadList *LL;
@@ -226,7 +226,7 @@ void solve_Sc_3D(Domain *D,int iteration)
    dx=D->dx;   dy=D->dy;   dz=D->dz;
    K0=D->K0;
    kx=D->kx; ky=D->ky;
-	ks=D->ks; ku=D->ku;
+	ks=D->ks; lambdaU=D->lambdaU;
 	dBessel = D->dBessel;
 
    coef=dz*eCharge*eCharge*mu0*0.25/eMass/D->ks/(D->lambda0*D->numSlice)/dx/dy;
@@ -244,11 +244,12 @@ void solve_Sc_3D(Domain *D,int iteration)
 
        while(p) {
          x=p->x;  y=p->y;   theta=p->theta;
-         macro=p->weight;   invG=1.0/p->gamma;
+         macro=p->weight;   invG=1.0/p->gamma; 
 
          K=K0*(1.0+kx*kx*x*x+ky*ky*y*y);
 
-         xi=ks*K*K*0.25*invG*invG/ku;
+         //xi=ks*K*K*0.25*invG*invG*lambdaU/(2*M_PI);
+         xi=K*K*0.5/(1+K*K);
          i=(int)((x-minX)/dx);
          j=(int)((y-minY)/dy);
          wx[1]=(x-minX)/dx-i;   wx[0]=1.0-wx[1];
@@ -267,7 +268,7 @@ void solve_Sc_3D(Domain *D,int iteration)
 					J2=D->BesselJ[idx][order]*w[0]+D->BesselJ[idx+1][order]*w[1];
 	            JJ=tmp*(J1-J2);
 	          } else {
-               chi = H*sqrt(2.0)*K*ks/ku*p->px*invG*invG;
+               chi = H*sqrt(2.0)*K*ks*lambdaU/(2*M_PI)*p->px*invG*invG;
 //               chi = H*K*ks/ku*p->px*invG*invG;
                tmp=pow(-1.0,(H-2)*0.5);
                idx=(int)(H*xi/dBessel);
@@ -303,7 +304,7 @@ void solve_Sc_3D(Domain *D,int iteration)
 
    F = D->SCFmode;         L = D->SCLmode;
 	nr = D->nr;	           dr = D->dr;  
-   ku = D->ku;            k0 = D->ks;
+   k0 = D->ks;
 	gamma0 = D->gamma0;
    for(i=0; i<=endI; i++)
      for(j=0; j<nr; j++) 
@@ -327,7 +328,8 @@ void solve_Sc_3D(Domain *D,int iteration)
        }
      }
 
-     coef=eCharge*velocityC*velocityC*mu0*ku/(1+K0*K0)/M_PI/dr/dr/(D->lambda0*D->numSlice);
+     //coef=eCharge*velocityC*velocityC*mu0*ku/(1+K0*K0)/M_PI/dr/dr/(D->lambda0*D->numSlice);
+     coef=eCharge*velocityC*velocityC*mu0*k0/(M_PI*dr*dr*gamma0*gamma0)/(D->lambda0*D->numSlice);
 
      for(i=startI; i<endI; i++)
      {
@@ -370,7 +372,8 @@ void solve_Sc_3D(Domain *D,int iteration)
 		     j = nr-1;
 			    y = j*dr; x=0.0;			      
              K=K0*(1.0+kx*kx*x*x+ky*ky*y*y);
-             alpha = 2.0*(l+1)*(l+1)*k0*ku*(1+K*K)/(1+K0*K0);
+             //alpha = 2.0*(l+1)*(l+1)*k0*ku*(1+K*K)/(1+K0*K0);
+             alpha = (l+1)*(l+1)*k0*k0*(1+K*K)/(gamma0*gamma0);
 			    Lc = -1.0/(dr*dr*j)*(2*j + f*f*log((j+0.5)/(j-0.5))) - alpha;
 			    Lm = 1.0/(dr*dr*j)*(j-0.5);
 			    cc[j]=Lm/Lc;
@@ -379,7 +382,7 @@ void solve_Sc_3D(Domain *D,int iteration)
            for(j=nr-2; j>=1; j--)  {
 			    y = j*dr; x=0.0;			      
              K=K0*(1.0+kx*kx*x*x+ky*ky*y*y);
-             alpha = 2.0*(l+1)*(l+1)*k0*ku*(1+K*K)/(1+K0*K0);
+             alpha = (l+1)*(l+1)*k0*k0*(1+K*K)/(gamma0*gamma0);
 			    Lp = 1.0/(dr*dr*j)*(j+0.5);
 			    Lc = -1.0/(dr*dr*j)*(2*j + f*f*log((j+0.5)/(j-0.5))) - alpha;
 			    cc[j]=Lm/(Lc-Lp*cc[j+1]);
@@ -389,7 +392,7 @@ void solve_Sc_3D(Domain *D,int iteration)
 			  j=0;
 			    y = j*dr; x=0.0;			      
              K=K0*(1.0+kx*kx*x*x+ky*ky*y*y);
-             alpha = 2.0*(l+1)*(l+1)*k0*ku*(1+K*K)/(1+K0*K0);
+             alpha = (l+1)*(l+1)*k0*k0*(1+K*K)/(gamma0*gamma0);
 			    Lp = 2.0/(dr*dr);
 			    Lc = -2.0/(dr*dr) - alpha;
 			    cc[j]=0.0;
@@ -443,8 +446,8 @@ void solve_Sc_1D(Domain *D,int iteration)
 {
    int i,s,h,H,numHarmony,order,n,step;
    int startI,endI,idx;  
-   double coef,tmp,J1,J2,K,Kr,K0,xi,macro,JJ,w[2]; 
-	double gamma,invGam,ks,ku,dBessel;
+   double coef,tmp,J1,J2,K,Kr,K0,lambdaU,xi,macro,JJ,w[2]; 
+	double gamma,invGam,k0,dBessel;
    double dz,theta,area,emitX,emitY,gammaX,gammaY,sigX,sigY;
    double complex tmpComp;
    ptclList *p;
@@ -457,7 +460,7 @@ void solve_Sc_1D(Domain *D,int iteration)
 
    startI=1; endI=D->subSliceN+1;
    dz=D->dz;
-	ks=D->ks; ku=D->ku;
+	k0=D->ks; lambdaU=D->lambdaU;
    numHarmony=D->numHarmony;
    K0=D->K0;
 	dBessel=D->dBessel;
@@ -477,7 +480,7 @@ void solve_Sc_1D(Domain *D,int iteration)
      sigY=sqrt(emitY/gammaY);
    
      area=M_PI*sigX*sigY;
-     coef=dz*eCharge*eCharge*mu0*0.5/eMass/D->ks/(D->lambda0*D->numSlice)/area;
+     coef=dz*eCharge*eCharge*mu0*0.5/eMass/k0/(D->lambda0*D->numSlice)/area;
 
      for(i=startI; i<endI; i++)
      {
@@ -487,7 +490,8 @@ void solve_Sc_1D(Domain *D,int iteration)
 			gamma = p->gamma;       invGam = 1.0/p->gamma;
 
          K=K0;
-         xi=ks/ku*0.25*K*K*invGam*invGam;			
+         //xi=ks/ku*0.25*K*K*invGam*invGam;			
+         xi=K*K*0.5/(1+K*K);
          for(h=0; h<numHarmony; h++)  {
            H = D->harmony[h];
            if(H%2==1)  {  //odd harmony
@@ -545,7 +549,7 @@ void solve_Sc_1D(Domain *D,int iteration)
          sigY=sqrt(emitY/gammaY);
    
          area=M_PI*sigX*sigY;
-         coef=eCharge*velocityC*velocityC*mu0/ks/area/(D->lambda0*D->numSlice);		 
+         coef=eCharge*velocityC*velocityC*mu0/k0/area/(D->lambda0*D->numSlice);		 
 
          p=D->particle[i].head[s]->pt;
          while(p) {

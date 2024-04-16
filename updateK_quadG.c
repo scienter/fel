@@ -9,7 +9,7 @@
 void updateK_quadG(Domain *D,int iteration,double half)
 {
    int n,exist,airPosition,noCurrent;
-   double z,K0,g,dz,q0,q1,x0,x1;
+   double z,K0,g,dz,q0,q1,x0,x1,lambdaU;
    int myrank, nTasks;
    UndulatorList *UL;
    QuadList *QD;
@@ -29,6 +29,7 @@ void updateK_quadG(Domain *D,int iteration,double half)
      for(n=0; n<UL->numbers; n++) {
        if(z>=UL->undStart[n] && z<UL->undEnd[n]) {
          K0=UL->K0[n]*(1+UL->taper*(z-UL->undStart[n]));
+         lambdaU=UL->lambdaU;
 	      if(UL->noCurrent==ON) noCurrent=ON; else ;
 	      exist=1;
        } else if(z>=UL->unitStart[n] && z<UL->unitEnd[n] && UL->air==ON) {
@@ -40,8 +41,10 @@ void updateK_quadG(Domain *D,int iteration,double half)
    
    if(airPosition==1) {
      K0=0.0;
+     lambdaU=0.0;
    } else ;
    D->K0=K0;
+   D->lambdaU=lambdaU;
 
    // save prev B field.
    D->prevK=K0;
