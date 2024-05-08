@@ -27,7 +27,7 @@ void calParticleDelay(Domain *D,int iteration)
    dz1=gamma0*eMass*vz/eCharge/B0*th0-ld;
 	dz2=(L1-ld)*(1.0/cos(th0)-1.0);
 	dz3=(L2-ld)*(1.0-vz/velocityC);
-	shiftZ0=(4.0*dz1+2.0*dz2+dz3)/dXi;
+	shiftZ0=4.0*dz1+2.0*dz2+dz3;
 
 	D->shiftSlice=(int)(shiftZ0);
    
@@ -48,20 +48,17 @@ void calParticleDelay(Domain *D,int iteration)
          dz1=gamma*eMass*vz/eCharge/B0*th0-ld;
          dz2=(L1-ld)*(1.0/cos(th0)-1.0);
          dz3=(L2-ld)*(1.0-vz/velocityC);
-         shiftZ=(4.0*dz1+2.0*dz2+dz3)/dXi;
+         shiftZ=4.0*dz1+2.0*dz2+dz3;
 	
-         tmp=(shiftZ0-shiftZ)*dPhi;
-         if(isnan(tmp)) {
-            printf("iteration=%d,i=%d,tmp=%g,dz1=%g,gamma=%g,vz=%g,B0=%g,th0=%g,ld=%g\n",iteration,sliceI,tmp,dz1,p->gamma,vz,B0,th0,ld);
-            exit(0);  //lala
-         }
-         p->theta-=(shiftZ0-shiftZ)*dPhi;
+         tmp=(shiftZ-shiftZ0)/D->lambda0*2*M_PI;
+         //printf("gamma0=%g, gamma=%g, tmp=%g\n",gamma0,gamma,tmp);
+         p->theta+=tmp;
          
 
-			if(fabs(shiftZ-shiftZ0)>=subSliceN) {
-				printf("shiftSlice=%g, subSliceN=%d it is too much.\n",shiftZ-shiftZ0,subSliceN);
-				exit(0);
-			}  else ;
+			//if(fabs(tmp/D->numSlice)>=subSliceN) {
+			//	printf("shiftSlice=%g, subSliceN=%d it is too much.\n",tmp/D->numSlice,subSliceN);
+			//   exit(0);
+			//}  else ;
 
          p=p->next;
        }
@@ -505,6 +502,8 @@ void chicane_test(Domain *D,int iteration)
    D->chicaneFlag=OFF;
    D->calChicaneFlag=OFF;
    Chi=D->chiList;
+
+   //printf("in test, chiON=%d\n",Chi->chiON);   //lala
 	
    while(Chi->next) {
      x0=Chi->chiStart;

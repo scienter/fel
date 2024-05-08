@@ -270,6 +270,7 @@ void parameterSetting(Domain *D,char *input)
 	  rank ++;
 	}
 	D->nChi = rank-1;
+   printf("nChi=%d\n",D->nChi);
 
    //wake field
    if(FindParameters("Wake_field",1,"activate",input,str)) D->wakeONOFF=whatONOFF(str);
@@ -372,6 +373,7 @@ int findChiLoadParameters(int rank, ChiList *Chi,Domain *D,char *input)
 
    if(FindParameters("Chicane",rank,"chicane_ONOFF",input,str)) Chi->chiON=whatONOFF(str);
 	else Chi->chiON=OFF;
+
 
    if(Chi->chiON==ON) {
      if(FindParameters("Chicane",rank,"delay_time",input,str)) Chi->delay=atof(str)*1e-15;

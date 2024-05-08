@@ -110,14 +110,14 @@ int main(int argc, char *argv[])
       chicane_test(&D,iteration);
       if(D.calChicaneFlag==ON) {
        	calParticleDelay(&D,iteration);
-       	rearrangeChicaneParticle(&D);
+       	if(D.mode==Time_Dependent) rearrangeChicaneParticle(&D); else ;
     
          if(D.chi_SSON==ON) {
            seed_Field_test(&D);
 			  selfSeed_Field(&D);
 			  if(myrank==0) printf("self-seeding is performed. at step=%d\n",iteration); 
          } else {
-       	  shiftChicaneField(&D);
+       	  if(D.mode==Time_Dependent) shiftChicaneField(&D);
 			  if(myrank==0) printf("Chicane is performed. at step=%d\n",iteration); else ;
 			}
 
@@ -157,10 +157,10 @@ int main(int argc, char *argv[])
       	//phase shifter
       	phaseShift(&D,iteration);
 
-      	periodicParticles(&D,iteration);
+      	//periodicParticles(&D,iteration);
 //printf("myrank=%d,iteration=%d, periodicParticles is done\n",myrank,iteration);
 
-//         rearrangeParticles(&D,iteration);
+         rearrangeParticles(&D,iteration);
 
 		}	//End of chicaneFlag==OFF
 
