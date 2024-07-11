@@ -1,0 +1,242 @@
+
+[Chicane]
+ chicane_ONOFF=ON
+ delay_time = 50					//[fs]
+ position_z = 9 //51					//[m]
+ dipole_length = 0.4				//[m]
+ dipole_distance_1 = 1.4		//[m]
+ dipole_distance_2 = 1.4		//[m]
+
+ selfseed_ONOFF = ON
+ energy_range=40
+ shift_energy = -20            // [eV]
+ washing_bunch = OFF
+ noise_for_washing = OFF
+ crystal_thickness = 100      // [um]
+ crystal_type = Diamond_220
+ //grating_const = 8.91704e-2   // [nm] Diamond (004)
+ //extinction_length = 23.9480   // [um]
+ //chi0 = -0.15538e-4
+
+
+[Phase_shifter]
+ number = 0
+ start_position = 6	//[m]
+ interval_length = 6		//[m]
+ phase = 1.2
+
+[Save]
+ field_save=OFF
+ particle_save=OFF
+ density_save=OFF
+ current_save=OFF
+ dump_save=OFF
+
+ field_format=TXT
+ particle_format=TXT
+ current_format=TXT
+ density_format=TXT
+ dump_format=HDF
+
+ dump_start=1000
+ dump_step=1000
+
+ max_time=3500			//[minute]
+
+// max_step=10
+ total_length=120	//[m]
+ save_step=10
+ save_start=10
+
+[Domain]
+
+ dimension=3
+// mode=Static
+// mode=Twiss
+ mode=Time_Dependent
+
+ minZ=-17			// [um]  For Time_Dependant
+ maxZ=17			// [um]  For Time_Dependant
+ minX=-300			// [um]
+ maxX=300				// [um]
+ minY=-300			// [um]
+ maxY=300				// [um]
+ nx=101
+ ny=101
+
+
+ num_harmony=1
+ harmony0 = 1
+ harmony1 = 3
+ harmony2 = 5
+
+ slices_in_bucket=10
+ lambdaUs_in_iteration=10	// number of lambdaU for one iteration
+
+[Space_charge]
+ activate = ON
+ number_fourier_mode = 1
+ number_longitudinal_mode = 1
+ radial_grids = 100
+
+
+[Seed]
+ power=0			// [W]
+ rms_duration=30		// [fs]
+ spot_sigma_R=20		// [um]
+ focus=1			// [m]
+
+
+[Undulator]
+ undulator_mode = Linear
+ numbers=20
+ air=OFF
+ linear_taper = -2.2e-4	// [T/undulator]
+ quad_taper_start_index = 9   // [undulator ID for start]
+ quad_taper = -2e-4		// [T/undulator]
+ slope_of_B = -0.00		// [T/m]
+ lambdaU = 2.6			// [cm]
+
+ unit_start = 0.0			// [m]
+ unit_end = 6.0			// [m]
+ undulator_start = 0.5		// [m]
+ undulator_end = 5.5		// [m]
+ K0 = 1.87			
+
+[Undulator]
+ undulator_mode = Linear
+ numbers=1
+ air=ON
+ linear_taper = -0.0e-4	// [T/undulator]
+ quad_taper = -0.0		// [T/undulator]
+ slope_of_B = -0.00		// [T/m]
+ lambdaU = 2.6			// [cm]
+
+ unit_start = 48			// [m]
+ unit_end = 54.0			// [m]
+ undulator_start = 48.5		// [m]
+ undulator_end = 53.5	// [m]
+ K0 = 0.0			
+
+[Wake_field]
+ activate = ON
+ shape = Flat
+ ac_dc = AC
+ radius = 4.5e-3                // [m]
+ conductivity = 3.03e7          //
+ ctau = 2.4e-6                  // relaxation_time X c [m]
+
+[Quad]
+ numbers=13
+
+ unit_start = -0.0325		// [m]
+ unit_end = 9.9675			// [m]
+ quad_start = -0.0325		// [m]
+ quad_end = 0.0325			// [m]
+ g = 39				// [T/m]
+
+[Quad]
+ numbers=13
+
+ unit_start = 4.9675		// [m]
+ unit_end = 14.9675			// [m]
+ quad_start = 4.9675		// [m]
+ quad_end = 5.0325			// [m]
+ g = -38.5				// [T/m]
+
+
+[EBeam]
+ load_type = Polygon
+ noise_ONOFF = ON
+
+ species=Electron
+ beam_energy=8544		// [MeV]
+ energy_spread=0.01		// [%]
+ peak_current=2700		// [A]
+ norm_emittance_x=0.5             // [mm mrad]
+ norm_emittance_y=0.5             // [mm mrad]
+ beta_x=27			// [m]
+ beta_y=18        	// [m]
+ alpha_x=0.0			
+ alpha_y=0.0             	
+ beamlets_in_bucket=400
+ number_in_beamlet=4
+
+ z_nodes=15
+ z0=-17.0e-6
+ z1=-13.5e-6
+ z2=-10.0e-6
+ z3=-8e-6
+ z4=-5e-6
+ z5=-2.5e-6
+ z6=0e-6
+ z7=3e-6
+ z8=6e-6
+ z9=6.8e-6
+ z10=7.5e-6
+ z11=9e-6
+ z12=10.0e-6
+ z13=13.5e-6
+ z14=16.0e-6
+ z_n0=0
+ z_n1=0.3
+ z_n2=0.7
+ z_n3=0.835
+ z_n4=0.83
+ z_n5=0.81
+ z_n6=0.83
+ z_n7=0.88
+ z_n8=0.99
+ z_n9=1
+ z_n10=1
+ z_n11=0.9
+ z_n12=0.8
+ z_n13=0.3
+ z_n14=0
+
+ energy_nodes=2
+ energy_z0=-17e-6
+ energy_z1=17e-6
+ energy_n0=1.003
+ energy_n1=1.00
+
+ energySpread_nodes=10
+ energySpread_z0=-17e-6
+ energySpread_z1=-12e-6
+ energySpread_z2=-7e-6
+ energySpread_z3=-1.8e-6
+ energySpread_z4=3e-6
+ energySpread_z5=5.1e-6
+ energySpread_z6=6e-6
+ energySpread_z7=7e-6
+ energySpread_z8=12e-6
+ energySpread_z9=16e-6
+ energySpread_n0=0.44
+ energySpread_n1=0.46
+ energySpread_n2=0.45
+ energySpread_n3=0.33
+ energySpread_n4=0.32
+ energySpread_n5=0.38
+ energySpread_n6=0.45
+ energySpread_n7=0.5
+ energySpread_n8=0.78
+ energySpread_n9=0.82
+
+ emit_nodes=8
+ emit_z0=-17e-6
+ emit_z1=-10e-6
+ emit_z2=-6e-6
+ emit_z3=-2e-6
+ emit_z4=3e-6
+ emit_z5=9e-6
+ emit_z6=12e-6
+ emit_z7=17e-6
+ emit_n0=1
+ emit_n1=0.75
+ emit_n2=0.7
+ emit_n3=0.675
+ emit_n4=0.775
+ emit_n5=1.25
+ emit_n6=1.75
+ emit_n7=2
+
