@@ -25,12 +25,19 @@ void shiftField(Domain D,int iteration)
    numHarmony=D.numHarmony;
    startI=1;  endI=D.subSliceN+1;
 
-   for(i=endI; i>=startI; i--) 
-      for(h=0; h<numHarmony; h++)  
-         for(j=0; j<N; j++) 
+  int myrank, nTasks;
+
+  MPI_Status status;
+  MPI_Comm_size(MPI_COMM_WORLD, &nTasks);
+  MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
+
+   for(h=0; h<numHarmony; h++)  
+      for(i=endI; i>=startI; i--) 
+         for(j=0; j<N; j++) {
             D.U[h][i][j]=D.U[h][i-1][j];
-    
-	MPI_Transfer1F_Zplus(D.U,D.numHarmony,N,endI,startI);
+		   }
+   MPI_Barrier(MPI_COMM_WORLD);
+   MPI_Transfer1F_Zplus(D.U,D.numHarmony,N,endI,startI);
 }
 
 

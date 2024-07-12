@@ -109,8 +109,8 @@ void periodicParticles(Domain *D,int iteration)
 	             calFlag=ON;
 	             //theta-=dPhi;
 	          } else if(aveTh<0) {
-	             intThe=(int)(aveTh/dPhi);
-	             delTh=dPhi*(intThe-1);
+	             intThe=(int)(aveTh/dPhi)-1;
+	             delTh=dPhi*intThe;
 	             calFlag=ON;
 	             //theta+=dPhi;
 	          } else ;

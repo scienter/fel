@@ -136,42 +136,45 @@ int main(int argc, char *argv[])
             }
          } else ;
 
+      	updateK_quadG(&D,iteration,0);
          transversePush(&D,iteration);
+      	updateK_quadG(&D,iteration,0.5);
          transversePush(&D,iteration);
+      	periodicParticles(&D,iteration);
 
       } else {
 			set_chicane_zero(&D);		
 
       	updateK_quadG(&D,iteration,0);
-//if(myrank==0) printf("myrank=%d,iteration=%d, 1st updateK is done\n",myrank,iteration);
+//if(myrank==0 && iteration>219) printf("myrank=%d,iteration=%d, 1st updateK is done\n",myrank,iteration);
 
 
       	transversePush(&D,iteration);
-//if(myrank==0) printf("myrank=%d,iteration=%d, 1st transversePush is done\n",myrank,iteration);
+//if(myrank==0 && iteration>219) printf("myrank=%d,iteration=%d, 1st transversePush is done\n",myrank,iteration);
 
       	updateK_quadG(&D,iteration,0.5);
-//if(myrank==0) printf("myrank=%d,iteration=%d, 2st updateK is done\n",myrank,iteration);
+//if(myrank==0 && iteration>219) printf("myrank=%d,iteration=%d, 2st updateK is done\n",myrank,iteration);
 
 			//if(D.shiftFlag==ON) push_theta_gamma(&D,iteration); else ;
          if(D.driftFlag==OFF) push_theta_gamma(&D,iteration);
          else                 drift_theta_gamma(&D,iteration);
-//if(myrank==0) printf("myrank=%d,iteration=%d, push_theta_gamma is done\n",myrank,iteration);
+//if(myrank==0 && iteration>219) printf("myrank=%d,iteration=%d, push_theta_gamma is done\n",myrank,iteration);
 
       	transversePush(&D,iteration);
-//if(myrank==0) printf("myrank=%d,iteration=%d, 2st transversePush is done\n",myrank,iteration);
+//if(myrank==0 && iteration>219) printf("myrank=%d,iteration=%d, 2st transversePush is done\n",myrank,iteration);
 
       	//phase shifter
       	phaseShift(&D,iteration);
+//if(myrank==0 && iteration>219) printf("myrank=%d,iteration=%d, phaseShift is done\n",myrank,iteration);
 
       	periodicParticles(&D,iteration);
-//if(myrank==0) printf("myrank=%d,iteration=%d, periodicParticles is done\n",myrank,iteration);
+//if(myrank==0 && iteration>219) printf("myrank=%d,iteration=%d, periodicParticles is done\n",myrank,iteration);
 
 //         rearrangeParticles(&D,iteration);
 
 		}	//End of chicaneFlag==OFF
 
       if(D.driftFlag==OFF && D.mode==Time_Dependent) shiftField(D,iteration); else ;
-
 
       if(myrank==0 && iteration%10==0) printf("iteration=%d, z=%g\n",iteration,iteration*D.dz); else ;
       

@@ -13,6 +13,11 @@ void calParticleDelay(Domain *D,int iteration)
 	double gamma,invGam,shiftZ,ks;
    LoadList *LL;
    ptclList *p;
+    int myrank, nTasks;
+
+    MPI_Status status;
+    MPI_Comm_size(MPI_COMM_WORLD, &nTasks);
+    MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
 
    ks=D->ks;
 	B0=D->dipoleB;
@@ -31,7 +36,7 @@ void calParticleDelay(Domain *D,int iteration)
 	dz3=(L2-ld)*(1.0-vz/velocityC);
 	shiftZ0=(4.0*dz1+2.0*dz2+dz3);
 
-	D->shiftSlice=(int)(shiftZ0);
+	D->shiftSlice=(int)(shiftZ0/(D->lambda0*D->numLambdaU));
    
    startI=1;  endI=D->subSliceN+1;
 	subSliceN=D->subSliceN;
@@ -63,11 +68,6 @@ void calParticleDelay(Domain *D,int iteration)
            shiftZ=4.0*dz1+2.0*dz2+dz3;
 	      
            p->theta[n]+=(shiftZ0-shiftZ)*ks;
-
-			  //if(fabs((shiftZ-shiftZ0)*ks/numSlice)>=subSliceN) {
-			  //  printf("shiftSlice=%g, subSliceN=%d it is too much.\n",shiftZ-shiftZ0,subSliceN);
-			//	 exit(0);
-			  //}  else ;
          }
          p=p->next;
        }
@@ -126,7 +126,8 @@ void rearrangeChicaneParticle(Domain *D)
       	    if(aveTh>=dPhi)  intZ=(int)(aveTh/dPhi);
          	 else if(aveTh<0) intZ=((int)(aveTh/dPhi))-1;
 	          else             intZ=0;
- 
+
+             intZ*=-1;
    	       indexI=i-startI+minI+intZ;
       	    for(rank=0; rank<nTasks; rank++) {
          	   if(D->minmax[rank]<=indexI && indexI<D->minmax[rank+1]) {
@@ -191,6 +192,7 @@ void rearrangeChicaneParticle(Domain *D)
 
 			    if(D->mode==Static) intZ=0; else ;
 
+             intZ*=-1;
              indexI=i-startI+minI+intZ;
 			    if(indexI<0 || indexI>D->sliceN) deleteFlag=ON; else ;
 
@@ -337,6 +339,7 @@ void shiftChicaneField(Domain *D)
 	minI=D->minI; maxI=D->maxI;
    N=D->nx*D->ny;
 	shiftN=D->shiftSlice;
+//	printf("myrank=%d, shiftSlice=%g, sliceN=%d\n",myrank,D->shiftSlice,shiftN);
 
 	minmax=D->minmax;
 	sendN=(int *)malloc(nTasks*sizeof(int ));

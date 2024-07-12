@@ -255,12 +255,14 @@ void push_theta_gamma_3D(Domain *D,int iteration)
 	             if(i>=0 && i<nx-1 && j>=0 && j<ny-1)  {
 			          indexJ = (int)(r/dr);
 				       wy[1]=(r/dr-indexJ); wy[0]=1.0-wy[1];
-     			       for(ll=0; ll<L; ll++) {
-				          Em[ll]=0.0+I*0.0;
-                      for(f=0; f<F; f++) 
-                         for(jj=0; jj<2; jj++) 
-				                Em[ll]+=D->Ez[sliceI][indexJ][ll][f]*wy[jj];
-					    }
+						 if(indexJ+1<D->nr) {
+     			          for(ll=0; ll<L; ll++) {
+  				             Em[ll]=0.0+I*0.0;
+                         for(f=0; f<F; f++) 
+                            for(jj=0; jj<2; jj++) 
+				                   Em[ll]+=D->Ez[sliceI][indexJ+jj][ll][f]*wy[jj];
+					       }
+						 }
        	   
                    wx[1]=(x0-minX)/dx-i; wx[0]=1.0-wx[1];
                    wy[1]=(y0-minY)/dy-j; wy[0]=1.0-wy[1];
@@ -288,6 +290,7 @@ void push_theta_gamma_3D(Domain *D,int iteration)
 			                if(H%2==1)  {  //odd harmony
 			                   coef=pow(-1.0,(H-1)*0.5);
 				                idx=(int)(H*xi/dBessel);
+                            if(idx>D->bn-1) { printf("idx=%d\n",idx); idx=D->bn-2; }
 				                w[1]=(H*xi/dBessel)-idx; w[0]=1.0-w[1];
 				                order=(H-1)*0.5;
    				             J1=D->BesselJ[idx][order]*w[0]+D->BesselJ[idx+1][order]*w[1];
@@ -299,6 +302,7 @@ void push_theta_gamma_3D(Domain *D,int iteration)
                             chi = H*sqrt(2.0)*K*px*2/(1+K*K);
                             coef=pow(-1.0,(H-2)*0.5);
                             idx=(int)(H*xi/dBessel);
+                            if(idx>D->bn-1) { printf("idx=%d\n",idx); idx=D->bn-2; }
                             w[1]=(H*xi/dBessel)-idx; w[0]=1.0-w[1];
                             order=(H-2)*0.5;
                             J1=D->BesselJ[idx][order]*w[0]+D->BesselJ[idx+1][order]*w[1];
