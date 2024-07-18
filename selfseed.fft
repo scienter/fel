@@ -67,7 +67,8 @@ void washingOut(Domain *D,int iteration)
 						bn=gsl_ran_gaussian(ran,sigma);
 						noise += an*cos(m*theta)+bn*sin(m*theta);
 			      }
-				   p->theta[n]=theta; // + noise*noiseONOFF;
+				   p->theta[n]=theta + noise;
+				   p->gamma[n]=p->gamma[0];
             }
 				p=p->next;
 			}
@@ -81,7 +82,7 @@ void washingOut(Domain *D,int iteration)
 
 void selfSeed_Field(Domain *D,int iteration)
 {
-   int h,i,j,n,rank,N,startI,endI,numHarmony,minI,dataNum,idx,nW,cenId,nx,ny;
+   int h,i,j,n,rank,N,startI,endI,numHarmony,minI,maxI,dataNum,idx,nW;
 	double delayZ,s,ds,sinTh,rangeT,val;
 	double k0,shiftT,d,extincL,*recvData,*fftU;
 	double complex chi0,Y1,Y2,R1,R2,y,chi1d,chi2d,compC,compSum,compV,*F;
@@ -95,9 +96,8 @@ void selfSeed_Field(Domain *D,int iteration)
 
 	numHarmony=D->numHarmony;
    startI=1;  endI=D->subSliceN+1;
-	minI=D->minI;
+	minI=D->minI; maxI=D->maxI;
    N=D->nx*D->ny;
-	nx=D->nx; ny=D->ny;
 
    ds = D->lambda0*D->numLambdaU;
 	sinTh = sin(D->bragTh);
@@ -144,14 +144,14 @@ void selfSeed_Field(Domain *D,int iteration)
       F[i]=cexp(I*chi1d) * (R2-R1)/(R2-R1*cexp(I*(chi1d-chi2d)))-compC;
 	}
  
-   h=0; cenId=(int)(ny/2*nx+nx/2);
+   h=0; j=N/2;
    for(n=0; n<nW; n++) {
       k = (minW + n*dw)/velocityC;
 		idx = n*2 + 0;
 		compSum = 0.0+I*0.0;
       for(i=startI; i<endI; i++) {
-	      s = (i-startI+minI)*ds;
-	      compSum+=D->U[h][i][cenId]*cexp(I*k*s)*ds;
+	      s = (i-startI+minI-maxI)*ds;
+	      compSum+=D->U[h][i][j]*cexp(I*k*s)*ds;
 		}
 		fftU[idx+0]=creal(compSum*F[n]);
 		fftU[idx+1]=cimag(compSum*F[n]);
@@ -180,11 +180,11 @@ void selfSeed_Field(Domain *D,int iteration)
 	      k = (minW + n*dw)/velocityC;
          compSum+=(fftU[idx]+I*fftU[idx+1])*cexp(-I*k*s)*dk;
 	   }
-      D->U[h][i][cenId]=compSum;
+      D->U[h][i][j]=compSum;
    }
 
    for(i=startI; i<endI; i++) {
-      compV=D->U[h][i][cenId];
+      compV=D->U[h][i][N/2];
       for(j=0; j<N; j++) {
          val=cabs(D->U[h][i][j]);
          D->U[h][i][j]=compV*val/cabs(compV);

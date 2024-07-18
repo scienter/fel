@@ -412,13 +412,13 @@ int findChiLoadParameters(int rank, ChiList *Chi,Domain *D,char *input)
 			  if(FindParameters("Chicane",rank,"chi0",input,str)) Chi->chi0=atof(str);
 			  else  { printf("In [Chicane], chi0=? \n");  fail=1; }
 			  Chi->bragTh=asin(M_PI/(d*D->ks));
-			  if(FindParameters("Chicane",rank,"washing_bunch",input,str)) Chi->washONOFF=whatONOFF(str);
-			  else Chi->washONOFF=OFF;
-			  if(FindParameters("Chicane",rank,"noise_for_washing",input,str)) Chi->noiseONOFF=whatONOFF(str);
-           else  Chi->noiseONOFF=OFF;  
-           
 			  if (myrank==0) printf("d=%g, ks=%g, brag angle=%g\n",d,D->ks,Chi->bragTh*180/M_PI);
 		  }
+		  if(FindParameters("Chicane",rank,"washing_bunch",input,str)) Chi->washONOFF=whatONOFF(str);
+		  else Chi->washONOFF=OFF;
+		  if(FindParameters("Chicane",rank,"noise_for_washing",input,str)) Chi->noiseONOFF=whatONOFF(str);
+        else  Chi->noiseONOFF=OFF;  
+           
 	  } else ;
    }
 

@@ -124,6 +124,10 @@ int main(int argc, char *argv[])
 					if(myrank==0) printf("chicane rearrange is done.\n");
 				}else ;	
             if(D.chi_SSON==ON) {
+				   if(D.chi_washONOFF==ON) {
+					   washingOut(&D,iteration); 
+						if(myrank==0) printf("washingOut\n");
+					}else ;
                selfSeed_Field(&D,iteration);
                if(myrank==0)
                   printf("=============>> self-seeding is performed. at step=%d, z=%g\n",iteration,iteration*D.dz);

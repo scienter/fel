@@ -220,3 +220,4 @@ void shiftChicaneField(Domain *D);
 void updateFELCharacter(Domain *D,int iteration);
 void initialFileSave(Domain *D);
 void selfSeed_Field(Domain *D,int iteration);
+void washingOut(Domain *D,int iteration);
