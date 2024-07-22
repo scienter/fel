@@ -36,19 +36,17 @@ void loadBeam(Domain D,LoadList *LL,int s,int iteration)
 void loadBeam3D(Domain *D,LoadList *LL,int s,int iteration)
 {
    int l,b,n,m,numInBeamlet,beamlets,noiseONOFF,flag1,flag2;
-   int i,startI,endI,minI,maxI,ii,index,tmpInt,recvData,cnt;
+   int i,startI,endI,minI,maxI,ii,index,tmpInt;
    double posZ,current,n0,En0,EmitN0,ESn0,bucketZ,dPhi,div,ptclCnt,phase;
-   double macro,remacro,theta,theta0,dGam,gam,gamma0,sigGam,Ns,noise,randTh;
+   double macro,remacro,theta,theta0,dGam,gam,gamma0,Ns,noise,randTh;
    double sigX,sigY,emitX,emitY,gammaX,gammaY,x,y,pz,px,py,vz;
    double sigXPrime,sigYPrime,xPrime,yPrime,delTX,delTY,distanceX,distanceY;
    double y1,y2,coef,tmp,sum,eNumbers,randPhase,an,bn,sigma,sqrt2,r,r1,r2,pr1,pr2,th;
 	double L,gl,g,lquad,beta0,min_beta,max_beta;
    QuadList *QD;
-   int myrank,nTasks,rank;
+   int myrank;
    ptclList *New;
-	MPI_Status status;
    MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
-   MPI_Comm_size(MPI_COMM_WORLD, &nTasks);
 
    minI=D->minI;   maxI=D->maxI;
    startI=1;       endI=1+D->subSliceN;
@@ -103,7 +101,6 @@ void loadBeam3D(Domain *D,LoadList *LL,int s,int iteration)
    T = gsl_rng_default;
    ran = gsl_rng_alloc(T);
 
-   cnt=0;
    for(i=startI; i<endI; i++) {
      n0=0.0;
 	  En0=0.0;
@@ -142,7 +139,6 @@ void loadBeam3D(Domain *D,LoadList *LL,int s,int iteration)
        EmitN0=1.0;
 		 ESn0=1.0;
      }
-     sigGam=LL->spread*gamma0*ESn0;
 
      emitX=LL->emitX*EmitN0/gamma0;
      emitY=LL->emitY*EmitN0/gamma0;
@@ -168,18 +164,15 @@ void loadBeam3D(Domain *D,LoadList *LL,int s,int iteration)
      eNumbers=remacro*numInBeamlet;
 	  if(eNumbers<10) eNumbers=10; else;
 
-     index=0;
      for(b=0; b<beamlets; b++)  {
-        if(index>=D->numSlice) index=0; else ;
-        index=0;
         gsl_qrng_get(q1,v1);
 
-        r1=v1[0];  if(r1==0.0)  r1=1e-9;        r2=v1[1];
-        pr1=v1[2]; if(pr1==0.0) pr1=1e-9;       pr2=v1[3];
-        th=v1[4];	 gam=v1[5];   if(gam==0.0) gam=1e-9;
-	     //th+=randTh;
-		  //tmpInt=(int)th;
-		  //th-=tmpInt;
+        r1=v1[0];  if(r1==0.0)  r1=1e-4;        r2=v1[1];
+        pr1=v1[2]; if(pr1==0.0) pr1=1e-4;       pr2=v1[3];
+        th=v1[4];	 gam=v1[5];   if(gam==0.0) gam=1e-4;
+	     th+=randTh;
+		  tmpInt=(int)th;
+		  th-=tmpInt;
 
         if(LL->transFlat==OFF) {        //Transverse Flat
            coef=sqrt(-2.0*log(r1));
@@ -208,10 +201,7 @@ void loadBeam3D(Domain *D,LoadList *LL,int s,int iteration)
         }
 
         tmp=sqrt(-2.0*log(gam))*cos(v1[6]*2*M_PI);
-		  gam=gamma0+sigGam*tmp*ESn0;
-		  //coef=sqrt(-2.0*log(v1[6]));
-		  //dGam=coef*(2*gam-1)*sigGam;
-		  //gam=gamma0+dGam;
+		  gam=gamma0+dGam*tmp*ESn0;
 		  theta0=th*dPhi;
 
         pz=sqrt((gam*gam-1.0)/(1.0+xPrime*xPrime+yPrime*yPrime));
@@ -226,7 +216,6 @@ void loadBeam3D(Domain *D,LoadList *LL,int s,int iteration)
         D->particle[i].head[s]->pt = New;
 
         New->weight=remacro;
-		  cnt+=remacro;
         New->index=LL->index;  	//index
         New->core=myrank;  	
 
@@ -260,18 +249,6 @@ void loadBeam3D(Domain *D,LoadList *LL,int s,int iteration)
    gsl_qrng_free(q2);
    gsl_rng_free(ran);
 
-   for(rank=1; rank<nTasks; rank++) {
-	   if(myrank==rank) MPI_Send(&cnt,1,MPI_INT,0,myrank,MPI_COMM_WORLD); else ;
-   }
-	if(myrank==0) {
-      for(rank=1; rank<nTasks; rank++) {
-         MPI_Recv(&recvData,1,MPI_INT,rank,rank,MPI_COMM_WORLD,&status);
-			cnt+=recvData;
-		}
-   } else ;
-   if(myrank==0) 
-	   printf("beam index = %d, beam charge = %g [pC]\n",s,cnt*1.602e-7*numInBeamlet);
-	else ;
 
 }
 

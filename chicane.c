@@ -339,7 +339,7 @@ void shiftChicaneField(Domain *D)
 	minI=D->minI; maxI=D->maxI;
    N=D->nx*D->ny;
 	shiftN=D->shiftSlice;
-//	printf("myrank=%d, shiftSlice=%g, sliceN=%d\n",myrank,D->shiftSlice,shiftN);
+	printf("myrank=%d, shiftSlice=%d, sliceN=%d\n",myrank,D->shiftSlice,shiftN);
 
 	minmax=D->minmax;
 	sendN=(int *)malloc(nTasks*sizeof(int ));
