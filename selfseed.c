@@ -67,7 +67,7 @@ void washingOut(Domain *D,int iteration)
 						bn=gsl_ran_gaussian(ran,sigma);
 						noise += an*cos(m*theta)+bn*sin(m*theta);
 			      }
-				   p->theta[n]=theta; // + noise*noiseONOFF;
+				   p->theta[n]=theta + noise*noiseONOFF;
             }
 				p=p->next;
 			}
@@ -83,7 +83,7 @@ void selfSeed_Field(Domain *D,int iteration)
 {
    int h,i,j,n,rank,N,startI,endI,numHarmony,minI,dataNum,idx,nW,cenId,nx,ny;
 	double delayZ,s,ds,sinTh,rangeT,val;
-	double k0,shiftT,d,extincL,*recvData,*fftU;
+	double k0,shiftT,d,extincL,*recvData,*fftU,*cross,*recvCrs;
 	double complex chi0,Y1,Y2,R1,R2,y,chi1d,chi2d,compC,compSum,compV,*F;
 	double Omega,x,minW,w,dw,k,dk,w0,A,G,rangeE,maxS;
    int myrank, nTasks;
@@ -144,6 +144,30 @@ void selfSeed_Field(Domain *D,int iteration)
       F[i]=cexp(I*chi1d) * (R2-R1)/(R2-R1*cexp(I*(chi1d-chi2d)))-compC;
 	}
  
+   //Calculate Cross
+   cross=(double *)malloc(N*sizeof(double ));
+   recvCrs=(double *)malloc(N*sizeof(double ));
+	for(i=0; i<N; i++) cross[i]=0.0;
+
+   h=0;
+   for(i=startI; i<endI; i++) 
+      for(j=0; j<N; j++) 
+         cross[j]+=cabs(D->U[h][i][j]);
+   if(myrank==0)  {
+      for(rank=1; rank<nTasks; rank++) {
+         MPI_Recv(recvCrs,N,MPI_DOUBLE,rank,rank,MPI_COMM_WORLD,&status);
+		   for(i=0; i<N; i++) cross[i]+=recvCrs[i];
+      }
+	} else {
+      for(rank=1; rank<nTasks; rank++) 
+	      if(myrank==rank) {
+			   MPI_Send(cross,N,MPI_DOUBLE,0,myrank,MPI_COMM_WORLD);
+			}
+	}
+   MPI_Barrier(MPI_COMM_WORLD);
+   MPI_Bcast(cross,N,MPI_DOUBLE,0,MPI_COMM_WORLD);
+
+   //center
    h=0; cenId=(int)(ny/2*nx+nx/2);
    for(n=0; n<nW; n++) {
       k = (minW + n*dw)/velocityC;
@@ -183,11 +207,11 @@ void selfSeed_Field(Domain *D,int iteration)
       D->U[h][i][cenId]=compSum;
    }
 
+   // other range
    for(i=startI; i<endI; i++) {
       compV=D->U[h][i][cenId];
       for(j=0; j<N; j++) {
-         val=cabs(D->U[h][i][j]);
-         D->U[h][i][j]=compV*val/cabs(compV);
+         D->U[h][i][j]=compV*cross[j]/cross[cenId];
 		}
 	}
 
@@ -224,6 +248,8 @@ void selfSeed_Field(Domain *D,int iteration)
 	free(F);
 	free(fftU);
 	free(recvData);
+	free(cross);
+	free(recvCrs);
 }
 
 
@@ -300,16 +326,17 @@ void seed_Field_test(Domain *D,int iteration)
 
 void whatCrystal(double ks,ChiList *Chi,char *str)
 {
-   double d,chi0R,chi0I,energy;
+   double d,chi0R,chi0I,minE,energy,x;
 	double a0,a1,a2,a3,a4,a5,a6;
 	double b0,b1,b2,b3,b4,b5,b6;
-   int myrank, nTasks;
+   int myrank, nTasks, fail=0;;
    MPI_Status status;
 
    MPI_Comm_size(MPI_COMM_WORLD, &nTasks);     
    MPI_Comm_rank(MPI_COMM_WORLD, &myrank);     
 
-   energy=ks*velocityC*hbar;   //eV
+   x=ks*velocityC*hbar;   //eV
+	energy=x;
 	if(energy<4000) {
 	   if(myrank==0) 
 		   printf("photon energy is %g eV, which is not allowed for now!\n",energy); 
@@ -318,42 +345,141 @@ void whatCrystal(double ks,ChiList *Chi,char *str)
 	} else ;
 
    if(strstr(str,"Diamond_220"))  {
-      d=1.261061E-10;     //grating constant
-
-      if(energy<12000) {
-	      a0=-0.225282;
-	      a1=-1994.24;
-         b0=1.88132e-05;
-         b1=-5.31208e-10;
+      d=0.12610611143129488E-9;     //grating constant
+		minE=5000;
+      if(energy>=minE) {
+	      a2=-1.6231e3;
+	      a1=2.0118;
+         a0=-6.2499e-8;
       } else {
-         a0=-0.0528651;
-         a1=-6814.76;
-         b0=0.0;
-         b1=0.0;
+		   fail=1;
       }
-	   chi0R=a0/(energy+a1) + b0+b1*energy;
-      if(energy<12000) {
-         a0=-0.000495555;
-	      a1=-3529.73;
-	      b0=1.20412e-07;
-	      b1=-5.66126e-12;
+	   chi0R=a2*pow(x,a1)+a0;
+      if(energy>=minE) {
+	      a2=-4.412e8;
+	      a1=4.1241;
+         a0=4.011e-10;
       } else {
-         a0=-1.26205e-05;
-         a1=-10024;
-         b0=0.0;
-         b1=0.0;
+		   fail=1;
       }
-	   chi0I=a0/(energy+a1) + b0+b1*energy;
+	   chi0I=a2*pow(x,a1)+a0;
+      if(energy>=minE) {
+	      a2=-1.9486e4;
+	      a1=1.5126;
+         a0=2.1267;
+      } else {
+		   fail=1;
+      }
 	   Chi->chi0=chi0R+I*chi0I;
-	   a0=-0.0564357;
-	   a1=0.00043456;
-	   Chi->extincL=(a0+a1*energy)*1e-6*2*M_PI;
+	   Chi->extincL=(a2*pow(x,a1)+a0)*1e-6;
 	   Chi->bragTh=asin(M_PI/(d*ks));
    }	
+   else if(strstr(str,"Diamond_22-4"))  {
+      d=7.2807397381315045E-11;     //grating constant
+		minE=8600;
+
+      if(energy>=minE) {
+	      a3=3.5416e-17;
+	      a2=-1.4997e-12;
+         a1=2.235e-8;
+         a0=-1.2357e-4;
+      } else {
+		   fail=1;
+      }
+	   chi0R=a3*x*x*x + a2*x*x + a1*x + a0;
+      if(energy>=minE) {
+	      a3=1.5775e-19;
+	      a2=-6.2307e-15;
+         a1=8.3378e-11;
+         a0=-3.8217e-7;
+      } else {
+		   fail=1;
+      }
+	   chi0I=a3*x*x*x + a2*x*x + a1*x + a0;
+      if(energy>=minE) {
+	      a3=7.1593e-14;
+	      a2=-3.1328e-9;
+         a1=4.9026e-5;
+         a0=4.6445;
+      } else {
+		   fail=1;
+      }
+	   Chi->extincL=(a3*x*x*x + a2*x*x + a1*x + a0)*1e-6;
+	   Chi->chi0=chi0R+I*chi0I;
+	   Chi->bragTh=asin(M_PI/(d*ks));
+   }	
+   else if(strstr(str,"Diamond_115"))  {
+      d=6.8643472545162051E-11;     //grating constant
+		minE=9100;
+
+      if(energy>=minE) {
+	      a3=2.6117e-17;
+	      a2=-1.1769e-12;
+         a1=1.8652e-8;
+         a0=-1.096e-4;
+      } else {
+		   fail=1;
+      }
+	   chi0R=a3*x*x*x + a2*x*x + a1*x + a0;
+      if(energy>=minE) {
+	      a3=1.0295e-19;
+	      a2=-4.3243e-15;
+         a1=6.15e-11;
+         a0=-2.9934e-7;
+      } else {
+		   fail=1;
+      }
+	   chi0I=a3*x*x*x + a2*x*x + a1*x + a0;
+      if(energy>=minE) {
+	      a3=8.6675e-14;
+	      a2=-4.0127e-9;
+         a1=6.628e-5;
+         a0=7.1187;
+      } else {
+		   fail=1;
+      }
+	   Chi->extincL=(a3*x*x*x + a2*x*x + a1*x + a0)*1e-6;
+	   Chi->chi0=chi0R+I*chi0I;
+	   Chi->bragTh=asin(M_PI/(d*ks));
+   }
+   else if(strstr(str,"Diamond_111"))  {
+      d=0.20593041763548620e-9;  //grating constant
+	   minE=3100;
+
+	   if(energy>=minE) {
+	      a2=-1.7038e3;
+		   a1=2.0176;
+		   a0=-1.1586e-7;
+		} else {
+		   fail=1;
+		}
+		chi0R=a2*pow(x,a1)+a0;
+		if(energy>=minE) {
+		   a2=-2.55e8;
+			a1=4.0592;
+			a0=1.0445e-9;
+		} else {
+		   fail=1;
+		}
+		chi0I=a2*pow(x,a1)+a0;
+      if(energy>=minE) {
+	      a2=-4.1594e3;
+	      a1=1.4651;
+         a0=1.106;
+      } else {
+		   fail=1;
+      }
+	   Chi->chi0=chi0R+I*chi0I;
+	   Chi->extincL=(a2*pow(x,a1)+a0)*1e-6;
+	   Chi->bragTh=asin(M_PI/(d*ks));
+   }	
+
    else   {
       printf("No crystall! Define the crystall\n"); 
       exit(0);
    }
+
+	if(fail==1) exit(0); else ;
 }
 
 

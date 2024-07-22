@@ -394,6 +394,11 @@ int findChiLoadParameters(int rank, ChiList *Chi,Domain *D,char *input)
 		  Chi->chiON=OFF;
 	  }
 
+	  if(FindParameters("Chicane",rank,"washing_bunch",input,str)) Chi->washONOFF=whatONOFF(str);
+	  else Chi->washONOFF=OFF;
+	  if(FindParameters("Chicane",rank,"noise_for_washing",input,str)) Chi->noiseONOFF=whatONOFF(str);
+     else  Chi->noiseONOFF=OFF;  
+           
      if(FindParameters("Chicane",rank,"selfseed_ONOFF",input,str)) Chi->selfSeedON=whatONOFF(str);
      else Chi->selfSeedON=OFF;
      if(Chi->selfSeedON==ON) {
@@ -414,11 +419,6 @@ int findChiLoadParameters(int rank, ChiList *Chi,Domain *D,char *input)
 			  Chi->bragTh=asin(M_PI/(d*D->ks));
 			  if (myrank==0) printf("d=%g, ks=%g, brag angle=%g\n",d,D->ks,Chi->bragTh*180/M_PI);
 		  }
-		  if(FindParameters("Chicane",rank,"washing_bunch",input,str)) Chi->washONOFF=whatONOFF(str);
-		  else Chi->washONOFF=OFF;
-		  if(FindParameters("Chicane",rank,"noise_for_washing",input,str)) Chi->noiseONOFF=whatONOFF(str);
-        else  Chi->noiseONOFF=OFF;  
-           
 	  } else ;
    }
 
