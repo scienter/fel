@@ -28,6 +28,13 @@
 #define Linear 1
 #define Helical 2
 
+#define NoCrystal 0
+#define Diamond_220 1
+#define Diamond_22m4 2
+#define Diamond_115 3
+#define Diamond_111 4
+#define Diamond_004 5
+
 typedef struct _Domain
 {
    int dimension,mode;
@@ -158,7 +165,7 @@ typedef struct _ChiList  {
 	double chiStart,chiEnd,ld,L1,L2,B0,delay;
 
 	//self seeding
-	int selfSeedON,noiseONOFF,washONOFF;
+	int selfSeedON,noiseONOFF,washONOFF,type;
 	double d, bragTh, extincL, rangeE,shiftE;
 	double complex chi0;
 	

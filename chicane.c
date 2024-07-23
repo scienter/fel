@@ -339,7 +339,7 @@ void shiftChicaneField(Domain *D)
 	minI=D->minI; maxI=D->maxI;
    N=D->nx*D->ny;
 	shiftN=D->shiftSlice;
-	printf("myrank=%d, shiftSlice=%d, sliceN=%d\n",myrank,D->shiftSlice,shiftN);
+	if(myrank==0) printf("myrank=%d, shiftSlice=%d, sliceN=%d\n",myrank,D->shiftSlice,D->sliceN); else ;
 
 	minmax=D->minmax;
 	sendN=(int *)malloc(nTasks*sizeof(int ));
@@ -347,102 +347,111 @@ void shiftChicaneField(Domain *D)
 	for(i=0; i<nTasks; i++) { sendN[i]=0; recvN[i]=0; }
 
    for(i=endI-1; i>=startI; i--) {
-     indexI=i-startI+minI+shiftN;
-	  if(indexI>=maxI) {
-       for(n=myrank+1; n<nTasks; n++) {
-         if(D->minmax[n]<=indexI && indexI<D->minmax[n+1]) {
-			  sendN[n]+=1;
-			} else ;
-	    }
-	  }
+      indexI=i-startI+minI+shiftN;
+		if(maxI<=indexI) {
+         for(n=myrank+1; n<nTasks; n++) {
+            if(D->minmax[n]<=indexI && indexI<D->minmax[n+1]) sendN[n]+=1; else ;
+	      }
+		} else ;
 	}
 
-     for(n=0; n<nTasks; n++)   {
-       if(myrank!=n)
+   for(n=0; n<nTasks; n++)   {
+      if(myrank!=n)
          MPI_Send(&sendN[n],1,MPI_INT,n,myrank,MPI_COMM_WORLD);
-     }
-     for(n=0; n<nTasks; n++)   {
-	    if(myrank!=n)    {
+   }
+   for(n=0; n<nTasks; n++)   {
+	   if(myrank!=n)    {
          MPI_Recv(&recvN[n],1,MPI_INT,n,n,MPI_COMM_WORLD,&status);
-	    }  else ;
-     }
-     MPI_Barrier(MPI_COMM_WORLD);	  
-
-     num=N*numHarmony*3;
-	  recvData=(double **)malloc(nTasks*sizeof(double *));
-     sendData=(double **)malloc(nTasks*sizeof(double *));
-     for(n=0; n<nTasks; n++)   {
-       sendData[n]=(double *)malloc(sendN[n]*num*sizeof(double ));
-       recvData[n]=(double *)malloc(recvN[n]*num*sizeof(double ));
-     }
-     start=(int *)malloc(nTasks*sizeof(int ));
-     for(n=0; n<nTasks; n++) start[n]=0;
-
-     for(i=endI-1; i>=startI; i--) {
-       indexI=i-startI+minI+shiftN;
-		 if(indexI>=maxI) {
-         for(n=myrank+1; n<nTasks; n++) {
-           if(D->minmax[n]<=indexI && indexI<D->minmax[n+1]) {
-             for(h=0; h<numHarmony; h++) {
-               for(j=0; j<N; j++) {
-                 val=D->U[h][i][j];
-	 	  	        sendData[n][start[n]+0]=creal(val);
-	 	  	        sendData[n][start[n]+1]=cimag(val);
-	 	  	        sendData[n][start[n]+2]=indexI;
-				     start[n]+=3;
-				     D->U[h][i][j]=0.0+I*0.0;
-				   }
-			    }
-			  } else ;
-         }
-		 } else {
-         for(h=0; h<numHarmony; h++)
-           for(j=0; j<N; j++) {
-             D->U[h][i+shiftN][j]=D->U[h][i][j];
-             D->U[h][i][j]=0.0*I*0.0;
-			  }			  				 
-		 } 
-	  }	//End of for(i=startI; i<endI; i++)
-
-
-     for(n=0; n<nTasks; n++)  {
-       if(myrank==n)  {
-         for(nn=0; nn<nTasks; nn++) {
-           if(n!=nn)
-             MPI_Send(sendData[nn],sendN[nn]*num,MPI_DOUBLE,nn,myrank,MPI_COMM_WORLD);
-			  else ;
-			}
-       }
-       else  {
-         MPI_Recv(recvData[n],recvN[n]*num,MPI_DOUBLE,n,n,MPI_COMM_WORLD,&status);
-			start[n]=0;
-         for(ii=0; ii<recvN[n]; ii++)  {
-			  indexI=recvData[n][start[n]+2];
-			  i=indexI-minI+startI;
-//			  if(myrank==0) printf("indexI=%d, i=%d\n",indexI,i);
-           for(h=0; h<numHarmony; h++) {
-             for(j=0; j<N; j++) {
-	 	  	      realV=recvData[n][start[n]+0];
-	 	  	      imagV=recvData[n][start[n]+1];
-					D->U[h][i][j]=realV+I*imagV;
-				   start[n]+=3;
-			    }
-			  }
-			}
-		 }
-       MPI_Barrier(MPI_COMM_WORLD);
-	  }	//End of for(n<nTasks)
-
-
-
-     for(n=0; n<nTasks; n++) {
-	    free(sendData[n]);
-	    free(recvData[n]);
-	  }
-	  free(sendData);
-	  free(recvData);
-	  free(start);
+	   }  else ;
+   }
+   MPI_Barrier(MPI_COMM_WORLD);	  
 	  
+   num=N*numHarmony*3;
+   recvData=(double **)malloc(nTasks*sizeof(double *));
+   sendData=(double **)malloc(nTasks*sizeof(double *));
+   for(n=0; n<nTasks; n++)   {
+      sendData[n]=(double *)malloc(sendN[n]*num*sizeof(double ));
+      recvData[n]=(double *)malloc(recvN[n]*num*sizeof(double ));
+   }
+   start=(int *)malloc(nTasks*sizeof(int ));
+   for(n=0; n<nTasks; n++) start[n]=0;
+
+   for(i=endI-1; i>=startI; i--) {
+      indexI=i-startI+minI+shiftN;
+		if(maxI<=indexI) {
+         for(n=myrank+1; n<nTasks; n++) {
+            if(D->minmax[n]<=indexI && indexI<D->minmax[n+1]) {
+               for(h=0; h<numHarmony; h++) {
+                  for(j=0; j<N; j++) {
+                     val=D->U[h][i][j];
+	 	  	            sendData[n][start[n]+0]=creal(val);
+	 	  	            sendData[n][start[n]+1]=cimag(val);
+	 	  	            sendData[n][start[n]+2]=indexI;
+				         start[n]+=3;
+				         D->U[h][i][j]=0.0+I*0.0;
+						}
+				   }
+			   } 
+			} 
+		   if(indexI>=minI && indexI<maxI) {
+            for(h=0; h<numHarmony; h++)
+               for(j=0; j<N; j++) {
+                  D->U[h][i+shiftN][j]=D->U[h][i][j];
+                  D->U[h][i][j]=0.0*I*0.0;
+			      }
+			} else {
+            for(h=0; h<numHarmony; h++)
+               for(j=0; j<N; j++) 
+                  D->U[h][i][j]=0.0*I*0.0;
+			}
+      } else {
+		   if(indexI>=minI && indexI<maxI) {
+            for(h=0; h<numHarmony; h++)
+               for(j=0; j<N; j++) {
+                  D->U[h][i+shiftN][j]=D->U[h][i][j];
+                  D->U[h][i][j]=0.0*I*0.0;
+			      }
+			} else {
+            for(h=0; h<numHarmony; h++)
+               for(j=0; j<N; j++) 
+                  D->U[h][i][j]=0.0*I*0.0;
+			}
+		} 
+	}	//End of for(i=startI; i<endI; i++)
+   MPI_Barrier(MPI_COMM_WORLD);
+
+   for(n=myrank+1; n<nTasks; n++)   {
+	   if(sendN[n]>0) {
+         MPI_Send(sendData[n],sendN[n]*num,MPI_DOUBLE,n,myrank,MPI_COMM_WORLD);
+		} else ;
+	}
+   for(n=0; n<myrank; n++)   {
+	   if(recvN[n]>0) {
+         MPI_Recv(recvData[n],recvN[n]*num,MPI_DOUBLE,n,n,MPI_COMM_WORLD,&status);
+
+         start[n]=0;
+         for(ii=0; ii<recvN[n]; ii++)  {
+            indexI=recvData[n][start[n]+2];
+		      i=indexI-minI+startI;
+            for(h=0; h<numHarmony; h++) {
+               for(j=0; j<N; j++) {
+	 	            realV=recvData[n][start[n]+0];
+	 	            imagV=recvData[n][start[n]+1];
+		            D->U[h][i][j]=realV+I*imagV;
+			         start[n]+=3;
+			      }
+			   }
+	      }
+		} else ;
+	}
+
+   for(n=0; n<nTasks; n++) {
+	   free(sendData[n]);
+	   free(recvData[n]);
+	}
+	free(sendData);
+	free(recvData);
+	free(start);
 
    free(sendN);   
    free(recvN);   

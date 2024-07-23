@@ -20,7 +20,8 @@ int whatONOFF(char *str);
 int whatShape(char *str);
 int whatACDC(char *str);
 int whatUndType(char *str);
-void whatCrystal(double ks,ChiList *Chi,char *str);
+void obrain_crystal_param(double ks,ChiList *Chi);
+int whatCrystal(char *str);
 
 
 double randomV()
@@ -408,7 +409,10 @@ int findChiLoadParameters(int rank, ChiList *Chi,Domain *D,char *input)
 	     else  { printf("In [Chicane], energy_range=? [eV]\n");  fail=1; }
         if(FindParameters("Chicane",rank,"shift_energy",input,str)) Chi->shiftE=atof(str);
 	     else  Chi->shiftE=0.0;
-        if(FindParameters("Chicane",rank,"crystal_type",input,str)) whatCrystal(D->ks,Chi,str);
+        if(FindParameters("Chicane",rank,"crystal_type",input,str)) {
+		     Chi->type=whatCrystal(str);
+			  obtain_crystal_param(D->ks,Chi);
+		  }
         else {
 		     if(FindParameters("Chicane",rank,"interplanar_distance",input,str)) d=atof(str)*1e-9;
 			  else  { printf("In [Chicane], interplanar_distance=? [nm]\n");  fail=1; }
@@ -825,3 +829,12 @@ int whatUndType(char *str)
    else           return 0;
 }
 
+int whatCrystal(char *str)
+{
+   if(strstr(str,"Diamond_220"))        return Diamond_220;
+	else if(strstr(str,"Diamond_22-4"))  return Diamond_22m4;
+	else if(strstr(str,"Diamond_115"))   return Diamond_115;
+	else if(strstr(str,"Diamond_111"))   return Diamond_111;
+	else if(strstr(str,"Diamond_004"))   return Diamond_004;
+	else                                 return NoCrystal;
+}
