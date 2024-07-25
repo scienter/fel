@@ -84,6 +84,8 @@ void boundary(Domain *D)
    D->minI=D->minmax[myrank];
    D->maxI=D->minmax[myrank+1];
    D->subSliceN=D->maxI-D->minI;
+	D->startI = 1;
+	D->endI = D->subSliceN+1;
    free(number);
    MPI_Barrier(MPI_COMM_WORLD);
    printf("myrank=%d,minI=%d,maxI=%d,subSliceN=%d\n",myrank,D->minI,D->maxI,D->subSliceN);

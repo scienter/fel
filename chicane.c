@@ -4,6 +4,8 @@
 #include <math.h>
 #include "mesh.h"
 #include "constants.h"
+#include <hdf5.h>
+#include <hdf5_hl.h>
 
 void calParticleDelay(Domain *D,int iteration)
 {
@@ -319,8 +321,110 @@ void rearrangeChicaneParticle(Domain *D)
 	 free(N);
 }
 
+void shiftChicaneField(Domain *D,int iteration)
+{
+   int h,H,sliceN,N,subSliceN,delI,startI,endI,minI,startRank,startID,start,i,j,n,shiftN;
+   char fileName[100],dataName[100];
+   double *field,realV,imagV;
+   int myrank, nTasks;
+   MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
+   MPI_Comm_size(MPI_COMM_WORLD, &nTasks);
 
-void shiftChicaneField(Domain *D)
+   hid_t file_id,dset_id,plist_id,tic_id;
+   herr_t status;
+   hid_t total_file_space,subfilespace,filespace,memspace,ticspace;
+   hsize_t dimsf[2],count[2],offset[2];
+
+   N=D->nx*D->ny; 
+	shiftN=D->shiftSlice;
+	sliceN=D->sliceN;
+
+	int minmax[nTasks];
+   for(n=0; n<nTasks; n++) 
+	   minmax[n]=D->minmax[n]-shiftN;
+
+	start=0;
+	startRank=0;
+	if(sliceN-shiftN<=0) ;
+	else {
+	   minmax[nTasks]=sliceN-shiftN;
+      for(n=nTasks-1; n>=0; n--) {
+		   minmax[n]=minmax[n+1]-(D->minmax[n+1]-D->minmax[n]);
+         if(minmax[n]<0 && minmax[n+1]>=0) startID=abs(minmax[n]); else ;
+		}
+      for(n=0; n<nTasks; n++) {
+         if(minmax[n]<0 && minmax[n+1]<0) minmax[n]=0;
+         else if(minmax[n]<0 && minmax[n+1]>=0) { startRank=n; minmax[n]=0; }
+			else ;
+		}
+	}
+
+	for(h=0; h<D->numHarmony; h++) 
+	   for(i=0; i<D->endI+1; i++) 
+	      for(j=0; j<N; j++)  
+            D->U[h][i][j]=0.0+I*0.0;
+
+	if(sliceN-shiftN<=0) ;
+	else {
+      sprintf(fileName,"field%d.h5",iteration);
+	   for(h=0; h<D->numHarmony; h++) {
+         H = D->harmony[h];
+	      sprintf(dataName,"U%d",H);
+
+         plist_id=H5Pcreate(H5P_FILE_ACCESS);
+         H5Pset_fapl_mpio(plist_id,MPI_COMM_WORLD,MPI_INFO_NULL);
+
+         file_id=H5Fopen(fileName,H5F_ACC_RDWR,plist_id);
+         H5Pclose(plist_id);
+
+         dimsf[0]=sliceN;
+         dimsf[1]=N*2;
+	      filespace=H5Screate_simple(2,dimsf,NULL);
+       
+   	   subSliceN=minmax[myrank+1]-minmax[myrank];
+   	   count[0]=subSliceN;
+	      count[1]=N*2;
+	      offset[0]=minmax[myrank];
+   	   offset[1]=0;
+         memspace=H5Screate_simple(2,count,NULL);
+
+         field = (double *)malloc(subSliceN*2*N*sizeof(double ));
+
+	      dset_id=H5Dopen2(file_id,dataName,H5P_DEFAULT);
+		   subfilespace=H5Dget_space(dset_id);
+   		H5Sselect_hyperslab(subfilespace,H5S_SELECT_SET,offset,NULL,count,NULL);
+
+	   	plist_id=H5Pcreate(H5P_DATASET_XFER);
+		   H5Pset_dxpl_mpio(plist_id,H5FD_MPIO_INDEPENDENT);
+   		status = H5Dread(dset_id, H5T_NATIVE_DOUBLE,memspace,subfilespace,plist_id,field);
+
+	   	if(myrank==startRank) startI=startID+D->startI;
+		   else                  startI=D->startI;
+			start=0;
+   	   for(i=startI; i<startI+subSliceN; i++) {
+	         for(j=0; j<N; j++)  {
+	            realV=field[start+2*j+0];
+	            imagV=field[start+2*j+1];
+	            D->U[h][i][j]=realV+I*imagV;
+   			}
+	   	   start+=2*N;
+		   }
+		
+   		H5Pclose(plist_id);
+	      H5Sclose(subfilespace);
+   		H5Dclose(dset_id);
+
+	   	H5Sclose(memspace);
+   		H5Sclose(filespace);
+	   	H5Fclose(file_id);
+		   free(field);
+      }
+	}
+
+}
+
+/*
+void shiftChicaneField(Domain *D,int iteration)
 {
    int s,h,numHarmony,i,j,n,ii,nn,startI,endI,N;
 	int shiftN,max,indexI,maxI,minI,num;
@@ -456,8 +560,7 @@ void shiftChicaneField(Domain *D)
    free(sendN);   
    free(recvN);   
 }
-
-
+*/
 
 void chicane_test(Domain *D,int iteration)
 {

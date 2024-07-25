@@ -133,7 +133,8 @@ int main(int argc, char *argv[])
                   printf("=============>> self-seeding is performed. at step=%d, z=%g\n",iteration,iteration*D.dz);
                else ;
             } else {
-               shiftChicaneField(&D);
+               saveFieldHDF(&D,iteration);
+               shiftChicaneField(&D,iteration);
                if(myrank==0)
                   printf("-------------->> Chicane is performed. at step=%d, z=%g.\n",iteration,iteration*D.dz);
                else ;
