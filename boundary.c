@@ -52,11 +52,6 @@ void boundary(Domain *D)
    D->minI=D->minmax[myrank];
    D->maxI=D->minmax[myrank+1];
    D->subSliceN=D->maxI-D->minI;
-   if(myrank==0) {
-      printf("myrank=%d, subSliceN=%d\n",myrank, D->subSliceN);
-      for(i=0; i<=nTasks; i++)
-		   printf("myrank=%d, minmax[%d]=%d\n",myrank,i,D->minmax[i]);
-	}
 
 	D->startI = 1;
 	D->endI = D->subSliceN+1;
