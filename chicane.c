@@ -84,7 +84,7 @@ void rearrangeChicaneParticle(Domain *D)
 
     int i,s,ii,intZ,cnt,deleteFlag,shiftFlag,domainShiftFlag,dataCnt;
     int l,rank,startI,endI,nSpecies,minI,maxI,indexI,n,*N;
-    double dPhi,theta,aveTh,delTh;
+    double dPhi,theta,aveTh,delTh,*shiftY;
 	 int *sendN,*recvN,*start,*cntN;
 	 double **sendData,**recvData;
     LoadList *LL;	 
@@ -105,6 +105,8 @@ void rearrangeChicaneParticle(Domain *D)
     recvN=(int *)malloc(nTasks*sizeof(int ));
 
     N=(int *)malloc(D->nSpecies*sizeof(int ));
+    shiftY=(double *)malloc(D->nSpecies*sizeof(double ));
+	 
     LL=D->loadList;
     s=0;
     while(LL->next) {
@@ -166,6 +168,10 @@ void rearrangeChicaneParticle(Domain *D)
           cnt=1;
           p=particle[i].head[s]->pt;
           while(p)  {
+			    // shift position
+			    for(n=0; n<N[s]; n++)
+				    p->y[n]+=D->chi_shiftY;
+				 				 
              if(cnt==1)  prev=p; else ;
               
 			    deleteFlag=OFF;
@@ -319,6 +325,7 @@ void rearrangeChicaneParticle(Domain *D)
 	 free(sendN);
 	 free(recvN);
 	 free(N);
+	 free(shiftY);
 }
 
 void shiftChicaneField(Domain *D,int iteration)
@@ -597,6 +604,7 @@ void chicane_test(Domain *D,int iteration)
        D->chi_washONOFF=Chi->washONOFF;
        D->rangeE = Chi->rangeE;
        D->shiftE = Chi->shiftE;
+       D->chi_shiftY = Chi->shiftY;
 	  } else if(x0<=z1 && z1<x1) {
        D->chicaneFlag=ON;
 	  } else ;
@@ -615,4 +623,5 @@ void set_chicane_zero(Domain *D)
   // belows are self-seeding option
   D->chi_washONOFF=OFF;
   D->chi_noiseONOFF=ON;
+  D->chi_shiftY=0.0;
 }

@@ -45,6 +45,16 @@ void cleanMemory(Domain *D)
           free(LL->EmitPoint);	
           free(LL->EmitN);	
         } else ;
+		  if(D->dimension==3) {
+           if(LL->YOffNodes>0) {
+              free(LL->YOffPoint);	
+              free(LL->YOffN);	
+           } else ;
+           if(LL->PyOffNodes>0) {
+              free(LL->PyOffPoint);	
+              free(LL->PyOffN);	
+           } else ;
+		  } else ;
         break;
       }
       tmpLL=LL->next;

@@ -51,7 +51,7 @@ typedef struct _Domain
    int nx,ny;		//number of grids in x and y direction
    double minZ,maxZ,minPhi,Lz,minTh;
    double minX,maxX,minY,maxY,dx,dy;
-   int minI,maxI,subSliceN;
+   int minI,maxI,subSliceN,startI,endI;
    int *minmax;
 
    // Field mesh
@@ -90,7 +90,7 @@ typedef struct _Domain
 
    //Chicane
    int nChi,chicaneFlag,calChicaneFlag,shiftSlice;
-   double dipoleB,ld,L1,L2,chicaneDelay,chi_delay,rangeE;
+   double dipoleB,ld,L1,L2,chicaneDelay,chi_delay,rangeE,chi_shiftY;
    struct _ChiList *chiList;
 
    //SelfSeed
@@ -162,7 +162,7 @@ typedef struct _PhaseShifter  {
 
 typedef struct _ChiList  {
    int chiON;
-	double chiStart,chiEnd,ld,L1,L2,B0,delay;
+	double chiStart,chiEnd,ld,L1,L2,B0,delay,shiftY;
 
 	//self seeding
 	int selfSeedON,noiseONOFF,washONOFF,type;
@@ -223,7 +223,7 @@ void chicane_test(Domain *D,int iteration);
 void set_chicane_zero(Domain *D);
 void calParticleDelay(Domain *D,int iteration);
 void rearrangeChicaneParticle(Domain *D);
-void shiftChicaneField(Domain *D);
+void shiftChicaneField(Domain *D,int iteration);
 void updateFELCharacter(Domain *D,int iteration);
 void initialFileSave(Domain *D);
 void selfSeed_Field(Domain *D,int iteration);

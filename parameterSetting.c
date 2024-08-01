@@ -399,6 +399,8 @@ int findChiLoadParameters(int rank, ChiList *Chi,Domain *D,char *input)
 	  else Chi->washONOFF=OFF;
 	  if(FindParameters("Chicane",rank,"noise_for_washing",input,str)) Chi->noiseONOFF=whatONOFF(str);
      else  Chi->noiseONOFF=OFF;  
+	  if(FindParameters("Chicane",rank,"shiftY",input,str)) Chi->shiftY=atof(str);
+     else  Chi->shiftY=0.0;  
            
      if(FindParameters("Chicane",rank,"selfseed_ONOFF",input,str)) Chi->selfSeedON=whatONOFF(str);
      else Chi->selfSeedON=OFF;
@@ -664,6 +666,41 @@ int findBeamLoadParameters(int rank,LoadList *LL,Domain *D,char *input)
             if(FindParameters("EBeam",rank,name,input,str)) LL->EmitN[i] = atof(str);
             else { printf("emit_n%d should be defined.\n",i);  fail=1; }
 			 }
+		 } else ;
+		 if(D->dimension==3) {
+          if(FindParameters("EBeam",rank,"shiftY",input,str)) LL->shiftY=atof(str);
+			 else  LL->shiftY=0.0;
+          if(FindParameters("EBeam",rank,"yoff_nodes",input,str)) LL->YOffNodes=atoi(str);
+			 else  { printf("in [EBeam], yoff_nodes=?\n");  fail=1;   }
+          if(LL->YOffNodes>0)  {
+             LL->YOffPoint = (double *)malloc(LL->YOffNodes*sizeof(double));
+             LL->YOffN = (double *)malloc(LL->YOffNodes*sizeof(double));   
+             for(i=0; i<LL->YOffNodes; i++)  {
+                sprintf(name,"yoff_z%d",i);
+                if(FindParameters("EBeam",rank,name,input,str)) LL->YOffPoint[i] = atof(str);
+                else  { printf("yoff_z%d should be defined.\n",i);  fail=1; }
+
+                sprintf(name,"yoff_n%d",i);
+                if(FindParameters("EBeam",rank,name,input,str)) LL->YOffN[i] = atof(str);
+                else { printf("yoff_n%d should be defined.\n",i);  fail=1; }
+			    }
+			 } else ;
+
+          if(FindParameters("EBeam",rank,"pyoff_nodes",input,str)) LL->PyOffNodes=atoi(str);
+			 else  { printf("in [EBeam], pyoff_nodes=?\n");  fail=1;   }
+          if(LL->PyOffNodes>0)  {
+             LL->PyOffPoint = (double *)malloc(LL->PyOffNodes*sizeof(double));
+             LL->PyOffN = (double *)malloc(LL->PyOffNodes*sizeof(double));   
+             for(i=0; i<LL->PyOffNodes; i++)  {
+                sprintf(name,"pyoff_z%d",i);
+                if(FindParameters("EBeam",rank,name,input,str)) LL->PyOffPoint[i] = atof(str);
+                else  { printf("pyoff_z%d should be defined.\n",i);  fail=1; }
+
+                sprintf(name,"pyoff_n%d",i);
+                if(FindParameters("EBeam",rank,name,input,str)) LL->PyOffN[i] = atof(str);
+                else { printf("pyoff_n%d should be defined.\n",i);  fail=1; }
+			    }
+		    } else ;
 		 } else ;
        break;
      case Gaussian :

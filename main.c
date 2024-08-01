@@ -125,6 +125,7 @@ int main(int argc, char *argv[])
 					   washingOut(&D,iteration); 
 						if(myrank==0) printf("washingOut\n");
 					}else ;
+               saveParticleHDF(&D,iteration);
 					if(myrank==0) printf("chicane rearrange is done.\n");
 				}else ;	
             if(D.chi_SSON==ON) {
@@ -132,12 +133,13 @@ int main(int argc, char *argv[])
                if(myrank==0)
                   printf("=============>> self-seeding is performed. at step=%d, z=%g\n",iteration,iteration*D.dz);
                else ;
-            } else {
                saveFieldHDF(&D,iteration);
+            } else {
                shiftChicaneField(&D,iteration);
                if(myrank==0)
                   printf("-------------->> Chicane is performed. at step=%d, z=%g.\n",iteration,iteration*D.dz);
                else ;
+               saveFieldHDF(&D,iteration);
             }
          } else ;
 

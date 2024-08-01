@@ -209,11 +209,10 @@ void selfSeed_Field(Domain *D,int iteration)
     
 
    // other range
-   for(i=startI; i<endI; i++) {
-      compV=D->U[h][i][cenId];
-      for(j=0; j<N; j++) {
+   for(i=startI; i<endI; i++) { 
+	   compV=D->U[h][i][cenId];
+      for(j=0; j<N; j++) 
          D->U[h][i][j]=compV*cross[j]/cross[cenId];
-		}
 	}
 
    maxS=300e-15*velocityC;
